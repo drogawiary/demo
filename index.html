@@ -40,7 +40,15 @@
   header{display:block; margin-bottom:14px}
   .banner{background:linear-gradient(180deg,#cfe3ff,#e9f0ff); color:#0b2a55; border-radius:18px; padding:18px; text-align:center; box-shadow:0 8px 24px #0001; border:1px solid #ffffff70; margin-bottom:12px}
   .banner h1{margin:0; font-size:clamp(22px,4.5vw,32px); font-weight:800; letter-spacing:.2px}
-  .controlbar{display:flex; align-items:center; justify-content:center; gap:10px; flex-wrap:wrap}
+  .controlbar{display:flex; align-items:center; justify-content:center; gap:10px; flex-wrap:wrap; position:relative}
+  .menu{position:absolute; top:100%; margin-top:8px; background:var(--panel); border:1px solid #00000015; box-shadow:0 14px 40px #0003; border-radius:14px; padding:8px; min-width:220px; max-width:280px; z-index:50; display:none}
+  .menu.show{display:block}
+  .menu h4{margin:6px 8px 8px; font-size:12px; color:var(--muted); font-weight:700; letter-spacing:.2px}
+  .menu .item{display:flex; align-items:center; justify-content:space-between; gap:8px; padding:8px 10px; border-radius:10px; cursor:pointer}
+  .menu .item:hover{background:var(--soft)}
+  .menu .item .meta{font-size:11px; color:var(--muted)}
+  .menu .del{border:none; background:#f1f3ff; color:#1a2a7a; border-radius:8px; padding:6px 8px; cursor:pointer}
+  .menu .empty{padding:10px; font-size:12px; color:var(--muted)}
   .controls{display:flex; gap:8px; align-items:center;}
   .field{display:flex; gap:8px; align-items:center; background:var(--panel); border:1px solid #00000010; padding:6px 8px; border-radius:12px}
   .field input{border:none; outline:none; background:transparent; color:var(--text); font-size:14px; padding:6px; width:150px}
@@ -48,14 +56,11 @@
     .field input{width:120px}
   }
   .title{font-weight:800; letter-spacing:.2px; font-size:clamp(18px,3vw,24px)}
-  .controls{display:flex; gap:8px; align-items:center;}
   .chip{background:var(--chip); border:1px solid #ffffff10; padding:8px 10px; border-radius:12px; font-size:13px}
   .btn{border:none; border-radius:12px; padding:10px 14px; cursor:pointer; font-weight:700; letter-spacing:.2px}
   .toggle{background:var(--panel); border:1px solid #00000010; box-shadow:0 4px 14px #0002;}
   .square{width:40px; height:40px; padding:0; display:grid; place-items:center; background:#e7ebff; color:#1a2a7a}
   .square.active{background:#1a2a7a; color:#e7ebff}
-  .field{display:flex; gap:8px; align-items:center; background:var(--panel); border:1px solid #00000010; padding:6px 8px; border-radius:12px}
-  .field input{border:none; outline:none; background:transparent; color:var(--text); font-size:14px; padding:6px}
   .start{background:linear-gradient(180deg, #35b86b, #2ea45f); color:white}
 
   .card{background:linear-gradient(180deg, var(--panel), var(--panel-2)); border:1px solid #ffffff12; border-radius:18px; padding:18px; box-shadow:0 10px 30px #0003}
@@ -89,9 +94,11 @@
         <div class="field">
           <span class="chip">Imię</span>
           <input id="nameInput" type="text" placeholder="np. Ania" maxlength="24" />
+          <button id="nameBtn" class="btn square" title="Wybierz zapisane imię">👤</button>
           <button id="peekBtn" class="btn square" title="Podgląd wszystkich dni (X)">✕</button>
           <button id="startBtn" class="btn start">Rozpocznij</button>
         </div>
+        <div id="nameMenu" class="menu" aria-hidden="true"></div>
       </div>
     </header>
 
@@ -172,6 +179,7 @@ const ui = {
   themeBtn: document.getElementById('themeBtn'),
   nameInput: document.getElementById('nameInput'),
   startBtn: document.getElementById('startBtn'),
+  nameBtn: document.getElementById('nameBtn'),
   peekBtn: document.getElementById('peekBtn'),
   prevBottom: document.getElementById('prevBottom'),
   nextBottom: document.getElementById('nextBottom'),
@@ -180,7 +188,8 @@ const ui = {
   metaStep: document.getElementById('metaStep'),
   dotsWrap: document.getElementById('footerDots'),
   toast: document.getElementById('toast'),
-  toastMsg: document.getElementById('toastMsg')
+  toastMsg: document.getElementById('toastMsg'),
+  nameMenu: document.getElementById('nameMenu')
 };
 
 let state = {
@@ -199,7 +208,11 @@ function save(){
   if(!state.name) return;
   if(state.preview) return; // w podglądzie nic nie zapisujemy
   localStorage.setItem(keyFor(state.name), JSON.stringify({
-    day:state.day, step:state.step, done:state.done, start_date: state.start_date
+    display_name: state.name,
+    day:state.day,
+    step:state.step,
+    done:state.done,
+    start_date: state.start_date
   }));
 }
 
@@ -207,18 +220,24 @@ function clearFor(name){ localStorage.removeItem(keyFor(name)); }
 
 function load(name){
   const raw = localStorage.getItem(keyFor(name));
-  if(!raw){ state = { ...state, name, day:1, step:0, done:Array(9).fill(false), start_date: todayISO() }; return; }
+  if(!raw){
+    state = { ...state, name, day:1, step:0, done:Array(9).fill(false), start_date: todayISO(), preview:false };
+    return;
+  }
   try{
     const d = JSON.parse(raw);
     state = {
       ...state,
-      name,
+      name: d.display_name || name,
       day: d.day||1,
       step: d.step||0,
       done: Array.isArray(d.done)? d.done.slice(0,9).concat(Array(9).fill(false)).slice(0,9) : Array(9).fill(false),
-      start_date: d.start_date || todayISO()
+      start_date: d.start_date || todayISO(),
+      preview:false
     };
-  }catch(e){ state = { ...state, name, day:1, step:0, done:Array(9).fill(false), start_date: todayISO() }; }
+  }catch(e){
+    state = { ...state, name, day:1, step:0, done:Array(9).fill(false), start_date: todayISO(), preview:false };
+  }
 }
 
 // ——— DATY ———
@@ -293,9 +312,8 @@ function render(){
   ui.prevBottom.disabled = disablePrev;
   ui.nextBottom.disabled = disableNext;
 
-  // Przycisk Rozpocznij/Reset — Reset tylko na ostatniej stronie dnia 9 (i nie w podglądzie)
+  // Przycisk Rozpocznij/Reset — Reset tylko na ostatniej stronie dnia 9
   ui.startBtn.textContent = isResetEligible() ? 'Reset' : 'Rozpocznij';
-  if (isResetEligible()) ui.startBtn.textContent = 'Reset';
 }
 
 function showToast(msg){ ui.toastMsg.textContent = msg; ui.toast.classList.add('show'); setTimeout(()=> ui.toast.classList.remove('show'), 2200); }
@@ -331,7 +349,7 @@ function prevStep(){
 // ——— ZDARZENIA ———
 ui.themeBtn.addEventListener('click', toggleTheme);
 ui.startBtn.addEventListener('click', ()=>{
-  // RESET dostępny tylko na 9 dniu ostatniej stronie i tylko poza podglądem
+  // RESET dostępny tylko na 9 dniu ostatniej stronie
   if(isResetEligible()){
     const prevName = state.name; if(prevName) clearFor(prevName);
     // wyłącz podgląd i zdejmij aktywność ikony X
@@ -372,6 +390,70 @@ ui.peekBtn.addEventListener('click', ()=>{
 (function initTheme(){ const saved = localStorage.getItem(LS_THEME); if(saved){ setTheme(saved); } else { const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches; setTheme(prefersDark? 'dark':'light'); } })();
 render();
 
+// ——— LISTA ZAPISANYCH IMION ———
+function listProfiles(){
+  const rows = [];
+  for(let i=0;i<localStorage.length;i++){
+    const k = localStorage.key(i);
+    if(!k || !k.startsWith(LS_PREFIX)) continue;
+    try{
+      const d = JSON.parse(localStorage.getItem(k) || '{}');
+      const name = d.display_name || k.slice(LS_PREFIX.length);
+      const start = d.start_date ? formatPL(parseISODate(d.start_date)) : '—';
+      const doneCount = Array.isArray(d.done) ? d.done.filter(Boolean).length : 0;
+      rows.push({name, start, doneCount});
+    }catch(_){}
+  }
+  rows.sort((a,b)=> a.name.localeCompare(b.name, 'pl'));
+  return rows;
+}
+
+function openNameMenu(){
+  const rows = listProfiles();
+  const menu = ui.nameMenu; if(!menu) return;
+  if(rows.length===0){
+    menu.innerHTML = '<div class="empty">Brak zapisanych imion. Zacznij od wpisania imienia i kliknij „Rozpocznij”.</div>';
+  } else {
+    const items = rows.map(r => `
+      <div class="item" data-name="${r.name}">
+        <div>
+          <div><strong>${r.name}</strong></div>
+          <div class="meta">start: ${r.start} • ukończone dni: ${r.doneCount}/9</div>
+        </div>
+        <button class="del" data-del="${r.name}">Usuń</button>
+      </div>`).join('');
+    menu.innerHTML = '<h4>Zapisane imiona</h4>' + items;
+  }
+  menu.classList.add('show');
+  menu.setAttribute('aria-hidden','false');
+}
+function closeNameMenu(){ if(!ui.nameMenu) return; ui.nameMenu.classList.remove('show'); ui.nameMenu.setAttribute('aria-hidden','true'); }
+
+ui.nameBtn.addEventListener('click', (e)=>{
+  e.stopPropagation();
+  if(ui.nameMenu.classList.contains('show')) closeNameMenu(); else openNameMenu();
+});
+
+document.addEventListener('click', (e)=>{
+  if(!ui.nameMenu.classList.contains('show')) return;
+  if(!ui.nameMenu.contains(e.target) && e.target !== ui.nameBtn) closeNameMenu();
+});
+
+ui.nameMenu.addEventListener('click', (e)=>{
+  const del = e.target.closest('[data-del]');
+  if(del){
+    const n = del.getAttribute('data-del');
+    if(n){ clearFor(n); if(state.name && state.name.toLowerCase()===n.toLowerCase()){ state = { name:'', day:1, step:0, done:Array(9).fill(false), start_date:null, preview:false }; render(); }
+    openNameMenu(); showToast('Usunięto.'); }
+    return;
+  }
+  const item = e.target.closest('.item');
+  if(item){
+    const n = item.getAttribute('data-name');
+    if(n){ state.preview=false; if(ui.peekBtn) ui.peekBtn.classList.remove('active'); load(n); if(!state.start_date) state.start_date = todayISO(); save(); render(); showToast(`Witaj, ${state.name}!`); closeNameMenu(); }
+  }
+});
+
 // ——— PROSTE TESTY (uruchamiane once, nie modyfikują stanu trwałego) ———
 (function selfTests(){
   try{
@@ -386,6 +468,13 @@ render();
 
     // Test 3: render() nie psuje się bez imienia
     state.name = ''; render();
+
+    // Test 4: isResetEligible — działa tylko na ostatniej stronie dnia 9
+    state.name = 'Test'; state.day = 9; state.step = stepsForCurrent().length - 1; if(!isResetEligible()) throw new Error('isResetEligible should be true at last page of day 9');
+    state.step = 0; if(isResetEligible()) throw new Error('isResetEligible should be false at step 1');
+
+    // Test 5: preview NAWIGACJA — pozwala przejść z ostatniego kroku dnia do kolejnego dnia
+    state.preview = true; state.day = 1; state.step = stepsForCurrent().length - 1; nextStep(); if(state.day !== 2) throw new Error('Preview nextStep should advance day');
 
     // Przywróć
     state = JSON.parse(snap); render();
