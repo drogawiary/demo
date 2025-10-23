@@ -299,7 +299,7 @@ function render(){
   ui.startBtn.textContent = isResetEligible() ? 'Reset' : 'Start';
 }
 
-function showToast(msg){ ui.toastMsg.textContent = msg; ui.toast.classList.add('show'); setTimeout(()=> ui.toast.classList.remove('show'), 5000); }
+function showToast(msg){ ui.toastMsg.textContent = msg; ui.toast.classList.add('show'); setTimeout(()=> ui.toast.classList.remove('show'), 3600); }
 
 // ——— NAWIGACJA ———
 function nextStep(){
