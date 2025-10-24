@@ -285,7 +285,18 @@ function isResetEligible(){
   return state.step === steps.length - 1; // ostatnia strona dnia 9
 }
 
+function canStart(){
+  const typed = ui.nameInput.value.trim();
+  if(!typed) return false; // aktywny tylko gdy coś wpisane
+  // jeśli już zalogowani na to samo imię, Start zbędny
+  if(state.name && typed.toLowerCase() === state.name.toLowerCase()) return false;
+  return true; // pozwól uruchomić nową nowennę dla innego imienia
+}
+function updateStartButton(){ ui.startBtn.disabled = !canStart(); }
+
 function render(){
+  // po każdym renderze odśwież stan przycisku Start
+  updateStartButton();
   // Teksty i meta
   if(!state.name){
     ui.content.textContent = 'Podaj imię i kliknij „Start”, aby zacząć dzień 1.';
@@ -375,13 +386,16 @@ ui.startBtn.addEventListener('click', ()=>{
   if(!inputName){ showToast('Podaj imię, aby rozpocząć.'); return; }
   state.preview = false; snapshot = null; ui.peekBtn.classList.remove('active');
   load(inputName); if(!state.start_date) state.start_date = todayISO(); save(); render(); showToast(`Witaj, ${state.name}!`);
+  // ustaw pole imienia na bieżący profil i wyłącz Start (bo to samo imię)
+  ui.nameInput.value = state.name; updateStartButton();
   // po starcie ustaw planowanie północy i natychmiast zsynchronizuj z kalendarzem
   scheduleMidnightSync(); syncDayToCalendar();
 });
 
 ui.prevBottom.addEventListener('click', prevStep);
 ui.nextBottom.addEventListener('click', nextStep);
-ui.nameInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter') ui.startBtn.click(); });
+ui.nameInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter' && canStart()) ui.startBtn.click(); });
+ui.nameInput.addEventListener('input', updateStartButton);
 
 // Podgląd (X) — włącza swobodne przewijanie wszystkich dni, bez zapisu
 ui.peekBtn.addEventListener('click', ()=>{
@@ -458,6 +472,8 @@ ui.nameMenu.addEventListener('click', (e)=>{
   if(item){
     const n = item.getAttribute('data-name');
     if(n){ state.preview=false; if(ui.peekBtn) ui.peekBtn.classList.remove('active'); load(n); if(!state.start_date) state.start_date = todayISO(); save(); render(); showToast(`Witaj, ${state.name}!`); closeNameMenu();
+      // ustaw pole imienia i zablokuj Start (to samo imię)
+      ui.nameInput.value = state.name; updateStartButton();
       scheduleMidnightSync(); syncDayToCalendar();
     }
   }
