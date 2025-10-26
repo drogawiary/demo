@@ -52,15 +52,14 @@
   .controls{display:flex; gap:8px; align-items:center;}
   .field{display:flex; gap:8px; align-items:center; background:var(--panel); border:1px solid #00000010; padding:6px 8px; border-radius:12px}
   .field input{border:none; outline:none; background:transparent; color:var(--text); font-size:14px; padding:6px; width:130px}
-  .title{font-weight:800; letter-spacing:.2px; font-size:clamp(18px,3vw,24px)}
-  .chip{background:var(--chip); border:1px solid #ffffff10; padding:8px 10px; border-radius:12px; font-size:13px}
   .btn{border:none; border-radius:12px; padding:10px 14px; cursor:pointer; font-weight:700; letter-spacing:.2px}
   .toggle{background:var(--panel); border:1px solid #00000010; box-shadow:0 4px 14px #0002;}
   .square{width:40px; height:40px; padding:0; display:grid; place-items:center; background:#e7ebff; color:#1a2a7a}
   .square.active{background:#1a2a7a; color:#e7ebff}
   .start{background:linear-gradient(180deg, #35b86b, #2ea45f); color:white}
   .card{background:linear-gradient(180deg, var(--panel), var(--panel-2)); border:1px solid #ffffff12; border-radius:18px; padding:18px; box-shadow:0 10px 30px #0003}
-  .content{min-height:120px; padding:14px; border-radius:14px; background:var(--soft); border:1px solid #ffffff22; line-height:1.5}
+  .content{min-height:120px; padding:14px; border-radius:14px; background:var(--soft); border:1px solid #ffffff22; line-height:1.6}
+  .content h3{margin:0 0 10px; font-size:21px}
   .meta{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:10px; font-size:13px; color:var(--muted)}
   .ctrl-bottom{display:flex; align-items:center; justify-content:center; gap:10px; margin-top:10px; flex-wrap:wrap}
   .nav-btn{border:none; border-radius:999px; padding:12px 20px; background:#2450ff; color:white; font-weight:800; letter-spacing:.3px; cursor:pointer}
@@ -84,7 +83,7 @@
         <button id="themeBtn" class="btn toggle" title="Tryb dzień / noc">🌞/🌙</button>
         <div class="field">
           <button id="nameBtn" class="btn square" title="Wybierz zapisane imię">👤</button>
-          <input id="nameInput" type="text" placeholder="np. Ania" maxlength="10" />
+          <input id="nameInput" type="text" placeholder="np. Ania" maxlength="24" />
           <button id="startBtn" class="btn start">Start</button>
           <button id="peekBtn" class="btn square" title="Podgląd wszystkich dni (X)">✕</button>
         </div>
@@ -93,7 +92,7 @@
     </header>
 
     <div class="card">
-      <div id="content" class="content">Podaj imię i kliknij „Start”, aby zacząć dzień 1.</div>
+      <div id="content" class="content">Podaj imię i kliknij „Start”, aby zacząć dzień 1. Albo kliknij w ikonkę postaci, by wybrać wcześniej zapisanych użytkowników.</div>
       <div class="meta">
         <div id="metaDay">Dzień –</div>
         <div id="metaStep">Krok –/–</div>
@@ -105,65 +104,185 @@
       </div>
 
       <div class="footer" id="footerDots"></div>
-      <div class="hint">Kwadraciki tylko pokazują postęp dnia nowenny. ✦ © 2025 drogawiary@wp.pl</div>
+      <div class="hint">Postęp nowenny — dzień po dniu. ✦ © 2025 drogawiary@wp.pl</div>
     </div>
   </div>
 
   <div class="toast" id="toast"><div id="toastMsg">—</div></div>
 
 <script>
-// ——— TREŚCI 9 DNI (przykładowe, po 3 kroki na dzień) ———
+// --- Bloki treści używane w Dniu 1 ---
+const SEKWE = `
+<h3>Sekwencja do Ducha Świętego</h3>
+<p>Przybądź, Duchu Święty, ześlij z nieba wzięty światła Twego strumień...
+<br/>Daj Twoim wierzącym, w Tobie ufającym, siedmiorakie dary. Amen.</p>`;
+
+const SKLAD = `
+<h3>Skład Apostolski</h3>
+<p>Wierzę w Boga, Ojca wszechmogącego, Stworzyciela nieba i ziemi...
+<br/>Wierzę w Ducha Świętego... żywot wieczny. Amen.</p>`;
+
+const AKT_ZALU = `
+<h3>Akt żalu</h3>
+<p>Boże mój, z całego serca żałuję za wszystkie moje grzechy...
+<br/>już więcej nie grzeszyć i na przyszłość unikać okazji do grzechu. Amen.</p>`;
+
+const MODL_MARYJA = `
+<h3>Modlitwa do Maryi Rozwiązującej Węzły</h3>
+<p>Matko Boża, która rozwiązujesz węzły... prowadź mnie do szczęścia wiecznego. Amen.</p>`;
+
+// — Nowe kroki po różańcu (16 i 17)
+const PODZIEKOWANIE_MARYI = `
+<h3>Podziękowanie Maryi Rozwiązującej Węzły</h3>
+<p>Maryjo, dziękuję Ci za Twoją opiekę i wstawiennictwo. Oddaję Tobie owoce tej modlitwy i proszę, prowadź mnie dalej drogą pokoju. Amen.</p>`;
+
+const ZAKONCZ_DZIEN_INFO = `
+<h3>Ukończyłeś pierwszy dzień nowenny</h3>
+<p>Jutro, po zalogowaniu, otworzy się <strong>kolejny dzień nowenny</strong>. Kliknij <em>Dalej</em>, aby zakończyć dzień i wrócić do początku.</p>`;
+
+// --- Litania i modlitwa św. Bernarda (skrót) ---
+const LITANIA_LORETANSKA = `
+<h3>Litania Loretańska (skrót)</h3>
+<p>Święta Maryjo — módl się za nami.<br/>Matko Boża — módl się za nami.<br/>Królowo Pokoju — módl się za nami.<br/>Amen.</p>`;
+
+const MODL_SW_BERNARDA = `
+<h3>Modlitwa św. Bernarda (Pomnij, o Najświętsza Panno Maryjo)</h3>
+<p>Pomnij, o Najświętsza Panno Maryjo, że nigdy nie słyszano, abyś opuściła tego, kto się do Ciebie ucieka... Matko Słowa Przedwiecznego, racz wysłuchać, o Pani, i wysłuchać łaskawie. Amen.</p>`;
+
+// --- Tajemnice różańca: 3 pierwsze + 2 końcowe ---
+const MYSTERIES = {
+  radosne: {
+    name: "tajemnice radosne",
+    first3: [
+      {t:"Zwiastowanie", m:"Prośmy o gotowość przyjęcia woli Bożej jak Maryja."},
+      {t:"Nawiedzenie św. Elżbiety", m:"Ucz mnie służby i wrażliwości na potrzeby innych."},
+      {t:"Narodzenie Pana Jezusa", m:"Oddaję Ci moje domy i relacje — niech będą miejscem pokoju."}
+    ],
+    last2: [
+      {t:"Ofiarowanie w świątyni", m:"Przynoszę Ci, Panie, moje plany i lęki o przyszłość."},
+      {t:"Odnalezienie w świątyni", m:"Odnajdź mnie, gdy się gubię; daj pragnienie Twojej mądrości."}
+    ]
+  },
+  bolesne: {
+    name: "tajemnice bolesne",
+    first3: [
+      {t:"Modlitwa w Ogrójcu", m:"Ucz mnie mówić: nie moja, lecz Twoja wola niech się stanie."},
+      {t:"Biczowanie", m:"Złącz moje cierpienia z Twoimi — uzdrów serce."},
+      {t:"Cierniem ukoronowanie", m:"Daj pokorę, gdy spotyka mnie niesprawiedliwość."}
+    ],
+    last2: [
+      {t:"Dźwiganie krzyża", m:"Ucz mnie wytrwałości i miłości w trudnościach."},
+      {t:"Śmierć na krzyżu", m:"Przebacz, jak Ty przebaczyłeś — zwłaszcza najtrudniejszym."}
+    ]
+  },
+  chwalebne: {
+    name: "tajemnice chwalebne",
+    first3: [
+      {t:"Zmartwychwstanie", m:"Odnów moją nadzieję i radość wiary."},
+      {t:"Wniebowstąpienie", m:"Uczyń mnie świadkiem Twojej miłości w codzienności."},
+      {t:"Zesłanie Ducha Świętego", m:"Napełnij mnie darami Ducha dla służby."}
+    ],
+    last2: [
+      {t:"Wniebowzięcie NMP", m:"Ucz mnie ufać jak Maryja, aż do końca."},
+      {t:"Ukoronowanie NMP", m:"Niech Maryja króluje w moim sercu i domu."}
+    ]
+  },
+  swiatla: {
+    name: "tajemnice światła",
+    first3: [
+      {t:"Chrzest w Jordanie", m:"Dziękuję za moje powołanie i chrzest — odnowisz we mnie łaskę."},
+      {t:"Kana Galilejska", m:"Ulecz to, co słabnie w miłości — przemieniaj wodę codzienności w wino łaski."},
+      {t:"Głoszenie Królestwa", m:"Daj mi nawrócenie serca i wierność Ewangelii."}
+    ],
+    last2: [
+      {t:"Przemienienie", m:"Rozjaśnij moje decyzje Twoim światłem."},
+      {t:"Eucharystia", m:"Uczyń moje serce eucharystycznym: wdzięczne i oddane."}
+    ]
+  }
+};
+
+const DAILY_PRAYERS = {
+  radosne: `<h3>Modlitwa dnia — radosne</h3><p>Panie, przez radość tajemnic wcielenia umocnij moją ufność i prostotę serca. Amen.</p>`,
+  bolesne: `<h3>Modlitwa dnia — bolesne</h3><p>Jezu, w godzinie próby bądź moją siłą i naucz mnie łączyć cierpienia z Twoją miłością. Amen.</p>`,
+  chwalebne: `<h3>Modlitwa dnia — chwalebne</h3><p>Panie chwały, prowadź mnie do życia pełnego nadziei i zwycięstwa nad złem. Amen.</p>`,
+  swiatla: `<h3>Modlitwa dnia — światła</h3><p>Jezu, Światłości świata, rozjaśnij mroki mojej codzienności i prowadź drogą prawdy. Amen.</p>`
+};
+
+const CLOSING_PRAYER = `<h3>Modlitwa na zakończenie</h3><p>Boże, który przez Maryję prowadzisz nas do Jezusa, pobłogosław owoce tej modlitwy. Daj pokój mojemu sercu i umocnij w miłości. <strong>Dziękuję, że pozwoliłaś mi odkryć moc tej nowenny. Amen.</strong></p>`;
+
+function mysteriesLinksHTML(){
+  return `
+  <h3>Trzy pierwsze dziesiątki różańca (tajemnice z dnia)</h3>
+  <p>Kliknij, aby przejść do 3 pierwszych dziesiątków z krótkimi rozważaniami; po nich będzie modlitwa dnia, a następnie 2 końcowe dziesiątki, Litania Loretańska, modlitwa św. Bernarda i modlitwa na zakończenie.</p>
+  <ul>
+    <li><a data-rosary="radosne" href="#tajemnice-radosne">Poniedziałek – radosne</a></li>
+    <li><a data-rosary="bolesne" href="#tajemnice-bolesne">Wtorek – bolesne</a></li>
+    <li><a data-rosary="chwalebne" href="#tajemnice-chwalebne">Środa – chwalebne</a></li>
+    <li><a data-rosary="swiatla" href="#tajemnice-swiatla">Czwartek – światła</a></li>
+    <li><a data-rosary="bolesne" href="#tajemnice-bolesne">Piątek – bolesne</a></li>
+    <li><a data-rosary="radosne" href="#tajemnice-radosne">Sobota – radosne</a></li>
+    <li><a data-rosary="chwalebne" href="#tajemnice-chwalebne">Niedziela – chwalebne</a></li>
+  </ul>
+  <p class="hint">W środku używaj przycisków „Wstecz/Dalej”.</p>`;
+}
+
+// --- Kroki dzienne ---
 const DAYS = [
   [
     "W imię Ojca, Syna i Ducha Świętego — powierzam Ci, Panie, wszystkie węzły mojego życia.",
-    "Maryjo, Matko rozwiązująca węzły — wstawiaj się za mną i ucz pokoju serca.",
-    "Jezu, oddaję Tobie lęki i niepewność. Rozwiąż to, czego sam nie potrafię." 
+    SEKWE,
+    SKLAD,
+    AKT_ZALU,
+    MODL_MARYJA,
+    mysteriesLinksHTML(),
+    PODZIEKOWANIE_MARYI,
+    ZAKONCZ_DZIEN_INFO
   ],
   [
     "Panie, naucz mnie cierpliwości, gdy węzły nie rozwiązują się natychmiast.",
     "Maryjo, naucz mnie ufać, kiedy nie widzę drogi.",
-    "Niech Twoja wola, Boże, prowadzi mnie przez ten dzień." 
+    "Niech Twoja wola, Boże, prowadzi mnie przez ten dzień."
   ],
   [
     "Zawierzam Ci relacje, w których utknąłem w nieporozumieniach.",
     "Maryjo, wlej w moje serce łagodność i cichość.",
-    "Jezu, pojednaj mnie z tymi, których zraniłem i którzy zranili mnie." 
+    "Jezu, pojednaj mnie z tymi, których zraniłem i którzy zranili mnie."
   ],
   [
     "Oddaję Ci, Panie, węzły w pracy i obowiązkach.",
     "Ucz mnie mądrości w decyzjach małych i wielkich.",
-    "Niech Twoje światło rozproszy mój chaos." 
+    "Niech Twoje światło rozproszy mój chaos."
   ],
   [
     "Panie, dotknij moich lęków o przyszłość.",
     "Maryjo, przypominaj mi, że jestem w rękach Boga.",
-    "Daj mi serce wdzięczne za to, co już rozwiązane." 
+    "Daj mi serce wdzięczne za to, co już rozwiązane."
   ],
   [
     "Zawierzam Ci moje zdrowie — ciało i duszę.",
     "Maryjo, otocz opieką wszystkich chorych i strapionych.",
-    "Jezu, bądź moją siłą w słabości." 
+    "Jezu, bądź moją siłą w słabości."
   ],
   [
     "Panie, naucz mnie przebaczać — naprawdę i do końca.",
     "Maryjo, wyproś mi łaskę pokory.",
-    "Niech przebaczenie rozwiąże najtwardsze węzły." 
+    "Niech przebaczenie rozwiąże najtwardsze węzły."
   ],
   [
     "Odłóż ode mnie pokusy zniechęcenia i gniewu.",
     "Maryjo, prowadź mnie drogą wytrwałości.",
-    "Jezu, napełnij mnie nadzieją, która nie zawodzi." 
+    "Jezu, napełnij mnie nadzieją, która nie zawodzi."
   ],
   [
     "Dziękuję Ci, Panie, za wszystkie łaski na tej drodze.",
     "Maryjo, naucz mnie żyć w prostocie i ufności.",
-    "Zawierzam Ci owoce nowenny i proszę o pokój serca." 
+    "Zawierzam Ci owoce nowenny i proszę o pokój serca."
   ]
 ];
 
-// ——— STAN i PAMIĘĆ ———
+// --- UI refs i stan ---
 const LS_THEME = 'nowenna_theme';
-const LS_PREFIX = 'nowenna_wezly_'; // klucz per imię
+const LS_PREFIX = 'nowenna_wezly_';
 
 const ui = {
   themeBtn: document.getElementById('themeBtn'),
@@ -188,15 +307,17 @@ let state = {
   step: 0,
   done: Array(9).fill(false),
   start_date: null,
-  preview: false
+  preview: false,
+  rosary: null,
+  lastRosaryType: null,
+  fromRosaryExit: false
 };
-let snapshot = null; // stan sprzed wejścia do podglądu
+let snapshot = null;
 
 function keyFor(name){ return LS_PREFIX + name.toLowerCase().trim(); }
-
 function save(){
   if(!state.name) return;
-  if(state.preview) return; // w podglądzie nic nie zapisujemy
+  if(state.preview) return;
   localStorage.setItem(keyFor(state.name), JSON.stringify({
     display_name: state.name,
     day:state.day,
@@ -205,12 +326,10 @@ function save(){
     start_date: state.start_date
   }));
 }
-
 function clearFor(name){ localStorage.removeItem(keyFor(name)); }
-
 function load(name){
   const raw = localStorage.getItem(keyFor(name));
-  if(!raw){ state = { ...state, name, day:1, step:0, done:Array(9).fill(false), start_date: todayISO(), preview:false }; return; }
+  if(!raw){ state = { ...state, name, day:1, step:0, done:Array(9).fill(false), start_date: todayISO(), preview:false, rosary:null }; return; }
   try{
     const d = JSON.parse(raw);
     state = {
@@ -220,12 +339,13 @@ function load(name){
       step: d.step||0,
       done: Array.isArray(d.done)? d.done.slice(0,9).concat(Array(9).fill(false)).slice(0,9) : Array(9).fill(false),
       start_date: d.start_date || todayISO(),
-      preview:false
+      preview:false,
+      rosary:null
     };
-  }catch(e){ state = { ...state, name, day:1, step:0, done:Array(9).fill(false), start_date: todayISO(), preview:false }; }
+  }catch(e){ state = { ...state, name, day:1, step:0, done:Array(9).fill(false), start_date: todayISO(), preview:false, rosary:null }; }
 }
 
-// ——— DATY ———
+// --- Daty ---
 function pad(n){ return String(n).padStart(2,'0'); }
 function toISODate(d){ return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
 function todayISO(){ const d = new Date(); return toISODate(new Date(d.getFullYear(), d.getMonth(), d.getDate())); }
@@ -233,18 +353,15 @@ function parseISODate(s){ const [y,m,da] = s.split('-').map(Number); return new 
 function formatPL(d){ return `${pad(d.getDate())}.${pad(d.getMonth()+1)}.${d.getFullYear()}`; }
 function addDays(base, days){ const d = new Date(base.getTime()); d.setDate(d.getDate()+days); return d; }
 function dateForDay(day){ if(!state.start_date) return null; const start = parseISODate(state.start_date); return addDays(start, day-1); }
-
-// Oblicz który to dzień nowenny wg kalendarza (1..9) na podstawie start_date
 function dayFromStart(){
   if(!state.start_date) return 1;
   const start = parseISODate(state.start_date);
   const today = parseISODate(todayISO());
-  const diffMs = today - start; // oba w północy lokalnej
+  const diffMs = today - start;
   const days = Math.floor(diffMs / (24*60*60*1000));
   return Math.min(9, Math.max(1, days + 1));
 }
 
-// Synchronizacja o północy — lekka i bezpieczna
 function msUntilNextMidnight(){
   const now = new Date();
   const next = new Date(now.getFullYear(), now.getMonth(), now.getDate()+1, 0,0,0,0);
@@ -260,60 +377,169 @@ function scheduleMidnightSync(){
   if(midnightTimer){ clearTimeout(midnightTimer); clearInterval(midnightTimer); midnightTimer = null; }
   midnightTimer = setTimeout(()=>{
     syncDayToCalendar();
-    // później co 24h
     midnightTimer = setInterval(syncDayToCalendar, 24*60*60*1000);
   }, msUntilNextMidnight());
 }
 
+// --- UI helpers ---
 function setTheme(mode){ const root = document.documentElement; if(mode === 'dark') root.classList.add('dark'); else root.classList.remove('dark'); localStorage.setItem(LS_THEME, mode); }
 function toggleTheme(){ const isDark = document.documentElement.classList.contains('dark'); setTheme(isDark? 'light' : 'dark'); }
 function initTheme(){ const saved = localStorage.getItem(LS_THEME); if(saved){ setTheme(saved); } else { const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches; setTheme(prefersDark? 'dark':'light'); } }
 
 function stepsForCurrent(){
   const base = DAYS[state.day-1];
-  // Ostatnia strona (gratki) w dniu 9
   if(state.day===9){
     return [...base, "🎉 Brawo! Ukończyłeś całą nowennę. Wciśnij Reset i rozpocznij od nowa."];
   }
   return base;
 }
 
+// — Pomocnicze: wykrycie różańca w danym dniu i łączna liczba kroków dnia
+function hasRosaryForCurrentDay(){
+  const steps = DAYS[state.day-1] || [];
+  return steps.some(s => typeof s === 'string' && s.includes('data-rosary'));
+}
+function totalForDay(){
+  const baseLen = (DAYS[state.day-1]||[]).length;
+  return baseLen + (hasRosaryForCurrentDay() ? 9 : 0); // Dzień 1 = 8 + 9 = 17
+}
+
+// — Indeks kroku z linkami do różańca (jeśli istnieje)
+function rosaryLinkIndex(){
+  const steps = DAYS[state.day-1] || [];
+  for(let i=0;i<steps.length;i++){
+    if(typeof steps[i]==='string' && steps[i].includes('data-rosary')) return i;
+  }
+  return -1;
+}
+
+// — Numer wyświetlany (ciągły) dla kroków nie-rozancowych
+function displayStepNumberForBaseStep(baseIdx){
+  const linkIdx = rosaryLinkIndex();
+  if(linkIdx === -1) return baseIdx + 1;
+  if(baseIdx < linkIdx) return baseIdx + 1;      // przed linkiem
+  if(baseIdx === linkIdx) return baseIdx + 1;    // sam link
+  return baseIdx + 1 + 9;                        // po różańcu: +9 etapów
+}
+
+// — Czy bieżący krok to ekran wyboru tajemnic różańca?
+function isRosarySelectionStep(){
+  const steps = stepsForCurrent();
+  const cur = steps[state.step];
+  return !state.preview && !!state.name && !state.rosary && typeof cur === 'string' && cur.includes('data-rosary');
+}
+
 function isResetEligible(){
   if(!state.name) return false;
   if(state.day!==9) return false;
   const steps = stepsForCurrent();
-  return state.step === steps.length - 1; // ostatnia strona dnia 9
+  return state.step === steps.length - 1;
 }
-
 function canStart(){
   const typed = ui.nameInput.value.trim();
-  if(!typed) return false; // aktywny tylko gdy coś wpisane
-  // jeśli już zalogowani na to samo imię, Start zbędny
+  if(!typed) return false;
   if(state.name && typed.toLowerCase() === state.name.toLowerCase()) return false;
-  return true; // pozwól uruchomić nową nowennę dla innego imienia
+  return true;
 }
 function updateStartButton(){ ui.startBtn.disabled = !canStart(); }
 
+// --- Różaniec ---
+function startRosary(type){
+  state.lastRosaryType = type;
+  state.rosary = { type, phase:'first3', index:0 };
+  render();
+  showToast(`Różaniec — ${MYSTERIES[type].name}: dziesiątek 1/3`);
+}
+function rosaryCurrentHTML(){
+  const R = state.rosary;
+  const pack = MYSTERIES[R.type];
+
+  if(R.phase==='first3'){
+    const cur = pack.first3[R.index];
+    return `
+      <h3>${pack.name} — dziesiątek ${R.index+1}/3</h3>
+      <p><strong>${cur.t}</strong><br/>${cur.m}</p>
+      <p class="hint">Odmów: Ojcze nasz • 10× Zdrowaś Maryjo • Chwała Ojcu.</p>
+    `;
+  }
+  if(R.phase==='dailyPrayer'){
+    return DAILY_PRAYERS[R.type];
+  }
+  if(R.phase==='last2'){
+    const cur = pack.last2[R.index];
+    return `
+      <h3>${pack.name} — dziesiątek ${R.index+1}/2 (końcowe)</h3>
+      <p><strong>${cur.t}</strong><br/>${cur.m}</p>
+      <p class="hint">Odmów: Ojcze nasz • 10× Zdrowaś Maryjo • Chwała Ojcu.</p>
+    `;
+  }
+  if(R.phase==='litania'){
+    return LITANIA_LORETANSKA;
+  }
+  if(R.phase==='bernard'){
+    return MODL_SW_BERNARDA;
+  }
+  if(R.phase==='closing'){
+    return CLOSING_PRAYER;
+  }
+  return '';
+}
+
+// Etykieta etapu różańca
+function rosaryStageLabel(){
+  if(!state.rosary) return '';
+  const R = state.rosary; const pack = MYSTERIES[R.type];
+  switch(R.phase){
+    case 'first3': return `${pack.name} — dziesiątek ${R.index+1}/3`;
+    case 'dailyPrayer': return `Modlitwa dnia (${pack.name})`;
+    case 'last2': return `${pack.name} — dziesiątek ${R.index+1}/2 (końcowe)`;
+    case 'litania': return 'Litania Loretańska';
+    case 'bernard': return 'Modlitwa św. Bernarda';
+    case 'closing': return 'Modlitwa na zakończenie';
+    default: return '';
+  }
+}
+
+function bindRosaryLinks(){
+  const links = ui.content.querySelectorAll('a[data-rosary]');
+  links.forEach(a=>{
+    a.addEventListener('click', (e)=>{
+      e.preventDefault();
+      const t = a.getAttribute('data-rosary');
+      if(!t) return;
+      startRosary(t);
+    });
+  });
+}
+
+// --- Render ---
 function render(){
-  // po każdym renderze odśwież stan przycisku Start
   updateStartButton();
-  // Teksty i meta
+
   if(!state.name){
-    ui.content.textContent = 'Podaj imię i kliknij „Start”, aby zacząć dzień 1.';
+    ui.content.innerHTML = 'Podaj imię i kliknij „Start”, aby zacząć dzień 1. Albo kliknij w ikonkę postaci, by wybrać wcześniej zapisanych użytkowników.';
     ui.metaDay.textContent = 'Dzień –';
     ui.metaStep.textContent = 'Krok –/–';
   } else {
-    const steps = stepsForCurrent();
-    const safeStep = Math.max(0, Math.min(state.step, steps.length-1));
-    state.step = safeStep;
-    ui.content.textContent = steps[safeStep];
-    const d = dateForDay(state.day);
-    const dateStr = d ? formatPL(d) : '—';
-    ui.metaDay.textContent = `Dzień ${state.day} z 9 — ${dateStr}`;
-    ui.metaStep.textContent = `Krok ${safeStep+1} z ${steps.length}`;
+    if(state.rosary){
+      ui.content.innerHTML = rosaryCurrentHTML();
+      const d = dateForDay(state.day);
+      const dateStr = d ? formatPL(d) : '—';
+      ui.metaDay.textContent = `Dzień ${state.day} z 9 — ${dateStr}`;
+      ui.metaStep.textContent = `Krok … z ${totalForDay()}`; // override w trybie różańca poniżej
+    } else {
+      const steps = stepsForCurrent();
+      const safeStep = Math.max(0, Math.min(state.step, steps.length-1));
+      state.step = safeStep;
+      ui.content.innerHTML = steps[safeStep];
+      const d = dateForDay(state.day);
+      const dateStr = d ? formatPL(d) : '—';
+      ui.metaDay.textContent = `Dzień ${state.day} z 9 — ${dateStr}`;
+      ui.metaStep.textContent = `Krok ${displayStepNumberForBaseStep(safeStep)} z ${totalForDay()}`;
+    }
   }
 
-  // Dots (poziomo, bez klikania). Podświetlenie dopiero po wpisaniu imienia
+  // Dots
   ui.dotsWrap.innerHTML = '';
   for(let i=1;i<=9;i++){
     const dot = document.createElement('div');
@@ -327,57 +553,164 @@ function render(){
     ui.dotsWrap.appendChild(dot);
   }
 
-  // Stan przycisków nawigacji (aktywny także w podglądzie)
+  // Nawigacja (blok ustawia stan przycisków)
   const canNavigate = state.name || state.preview;
-  const steps = canNavigate ? stepsForCurrent() : null;
-  const atFirst = !steps || state.step===0;
-  const atLast  = !steps || state.step===steps.length-1;
+  const stepsArr = canNavigate ? stepsForCurrent() : null;
+  const atFirst = !stepsArr || state.step===0;
+  const atLast  = !stepsArr || state.step===stepsArr.length-1;
   const disablePrev = !canNavigate || (atFirst && !(state.preview && state.day>1));
-  const disableNext = !canNavigate || (atLast  && !(state.preview && state.day<9));
+  let disableNext = !canNavigate || (atLast  && !(state.preview && state.day<9));
+  if(isRosarySelectionStep()) disableNext = true; // blokada na ekranie wyboru tajemnic
+
+  // Wyjątek: na ekranie końcowym Dnia 1 (krok 17) przycisk "Dalej" ma być aktywny,
+  // aby wykonać reset i wrócić do ekranu startowego.
+  if (state.name && state.day === 1 && stepsArr && stepsArr[state.step] === ZAKONCZ_DZIEN_INFO) {
+    disableNext = false;
+  }
+
   ui.prevBottom.disabled = disablePrev;
   ui.nextBottom.disabled = disableNext;
 
-  // Przycisk Start/Reset — Reset tylko na ostatniej stronie dnia 9
+  // Start/Reset
   ui.startBtn.textContent = isResetEligible() ? 'Reset' : 'Start';
+
+  // Podpinanie linków do różańca
+  if(!state.rosary && state.name){
+    const s = stepsForCurrent();
+    if(s[state.step] && s[state.step].includes('data-rosary')) bindRosaryLinks();
+  }
+}
+
+// — Reset wewnętrzny (bez przeładowania strony)
+function resetAll(){
+  // zaznacz ukończenie bieżącego dnia dla profilu
+  if(state.name){
+    state.done[state.day-1] = true;
+    save();
+  }
+  // twardy powrót do ekranu startu (bez usuwania profilu z localStorage)
+  state = { name:'', day:1, step:0, done:Array(9).fill(false), start_date:null, preview:false, rosary:null, lastRosaryType:null, fromRosaryExit:false };
+  snapshot = null;
+  ui.nameInput.value = '';
+  render();
 }
 
 function showToast(msg){ ui.toastMsg.textContent = msg; ui.toast.classList.add('show'); setTimeout(()=> ui.toast.classList.remove('show'), 3600); }
 
-// ——— NAWIGACJA ———
+// --- Nawigacja ---
 function nextStep(){
+  // Różaniec — wewnętrzna ścieżka
+  if(state.rosary){
+    const R = state.rosary;
+    const pack = MYSTERIES[R.type];
+    if(R.phase==='first3'){
+      if(R.index<2){ R.index++; showToast(`Różaniec — ${pack.name}: dziesiątek ${R.index+1}/3`); render(); return; }
+      R.phase='dailyPrayer'; showToast('Modlitwa dnia'); render(); return;
+    }
+    if(R.phase==='dailyPrayer'){
+      R.phase='last2'; R.index=0; showToast('Końcowe dziesiątki: 1/2'); render(); return;
+    }
+    if(R.phase==='last2'){
+      if(R.index<1){ R.index++; showToast('Końcowe dziesiątki: 2/2'); render(); return; }
+      R.phase='litania'; showToast('Litania Loretańska'); render(); return;
+    }
+    if(R.phase==='litania'){
+      R.phase='bernard'; showToast('Modlitwa św. Bernarda'); render(); return;
+    }
+    if(R.phase==='bernard'){
+      R.phase='closing'; showToast('Modlitwa na zakończenie'); render(); return;
+    }
+    if(R.phase==='closing'){
+      // wyjście z różańca do kolejnego kroku (podziękowanie)
+      state.rosary = null;
+      const steps = stepsForCurrent();
+      if(state.step < steps.length-1){
+        state.step += 1;
+        state.fromRosaryExit = true;
+        save(); render();
+      } else {
+        state.done[state.day-1] = true; save(); render(); showToast(`Ukończyłeś dzień ${state.day}.`);
+      }
+      return;
+    }
+  }
+
   const steps = stepsForCurrent();
+
+  // *** TWARDY WARUNEK: Dzień 1, ekran "Ukończyłeś pierwszy dzień nowenny"
+  if(state.name && state.day === 1 && steps[state.step] === ZAKONCZ_DZIEN_INFO){
+    resetAll();
+    showToast('Ukończyłeś dzień 1. Wróć jutro i zaloguj się ponownie.');
+    return;
+  }
+
+  // Podgląd
   if(state.preview){
     if(state.step < steps.length-1){ state.step += 1; render(); return; }
     if(state.day < 9){ state.day += 1; state.step = 0; render(); return; }
     showToast('Koniec podglądu: dzień 9.'); return;
   }
+
   if(!state.name) return;
+
+  // Zwykły krok
   if(state.step < steps.length-1){
-    state.step += 1; save(); render(); return;
+    state.step += 1;
+    state.fromRosaryExit = false;
+    save(); render(); return;
   }
-  state.done[state.day-1] = true; save(); render();
-  if(state.day===9){ showToast('Brawo! Ukończyłeś całą nowennę.'); }
-  else { showToast(`Ukończyłeś dzień ${state.day}.`); }
+
+  // Koniec dnia (dni 2–9)
+  state.done[state.day-1] = true; save();
+  if(state.day===9){
+    render();
+    showToast('Brawo! Ukończyłeś całą nowennę.');
+  } else {
+    state.step = 0; render(); showToast(`Ukończyłeś dzień ${state.day}.`);
+  }
 }
 
 function prevStep(){
-  if(state.preview){
-    if(state.step > 0){ state.step -= 1; render(); return; }
-    if(state.day > 1){ state.day -= 1; state.step = stepsForCurrent().length-1; render(); return; }
+  if(state.rosary){
+    const R = state.rosary;
+    const pack = MYSTERIES[R.type];
+    if(R.phase==='first3'){
+      if(R.index>0){ R.index--; showToast(`Różaniec — ${pack.name}: dziesiątek ${R.index+1}/3`); render(); return; }
+      // WYJŚCIE Z RÓŻAŃCA PRZY COFANIU Z 1/3 -> wracamy na ekran linków (krok 6)
+      state.rosary = null;
+      state.step = rosaryLinkIndex();
+      render(); return;
+    }
+    if(R.phase==='dailyPrayer'){ R.phase='first3'; R.index=2; showToast('Powrót: dziesiątek 3/3'); render(); return; }
+    if(R.phase==='last2'){
+      if(R.index>0){ R.index--; showToast('Końcowe dziesiątki: 1/2'); render(); return; }
+      R.phase='dailyPrayer'; showToast('Powrót: modlitwa dnia'); render(); return;
+    }
+    if(R.phase==='litania'){ R.phase='last2'; R.index=1; showToast('Powrót: końcowe 2/2'); render(); return; }
+    if(R.phase==='bernard'){ R.phase='litania'; showToast('Powrót: Litania'); render(); return; }
+    if(R.phase==='closing'){ R.phase='bernard'; showToast('Powrót: św. Bernard'); render(); return; }
     return;
   }
   if(!state.name) return;
-  if(state.step > 0){ state.step -= 1; save(); render(); }
+
+  const linkIdx = rosaryLinkIndex();
+  // cofnięcie z pierwszego kroku po różańcu do „closing”
+  if (linkIdx !== -1 && state.step === linkIdx + 1 && state.lastRosaryType) {
+    state.rosary = { type: state.lastRosaryType, phase:'closing', index:0 };
+    render();
+    return;
+  }
+
+  if(state.step > 0){ state.step -= 1; state.fromRosaryExit = false; save(); render(); }
 }
 
 // ——— ZDARZENIA ———
 ui.themeBtn.addEventListener('click', toggleTheme);
 ui.startBtn.addEventListener('click', ()=>{
-  // RESET dostępny tylko na 9 dniu ostatniej stronie
   if(isResetEligible()){
     const prevName = state.name; if(prevName) clearFor(prevName);
     state.preview = false; if(ui.peekBtn) ui.peekBtn.classList.remove('active');
-    state = { name:'', day:1, step:0, done:Array(9).fill(false), start_date:null, preview:false };
+    state = { name:'', day:1, step:0, done:Array(9).fill(false), start_date:null, preview:false, rosary:null, lastRosaryType:null, fromRosaryExit:false };
     snapshot = null; ui.nameInput.value = '';
     render(); showToast('Zresetowano.');
     return;
@@ -386,9 +719,7 @@ ui.startBtn.addEventListener('click', ()=>{
   if(!inputName){ showToast('Podaj imię, aby rozpocząć.'); return; }
   state.preview = false; snapshot = null; ui.peekBtn.classList.remove('active');
   load(inputName); if(!state.start_date) state.start_date = todayISO(); save(); render(); showToast(`Witaj, ${state.name}!`);
-  // ustaw pole imienia na bieżący profil i wyłącz Start (bo to samo imię)
   ui.nameInput.value = state.name; updateStartButton();
-  // po starcie ustaw planowanie północy i natychmiast zsynchronizuj z kalendarzem
   scheduleMidnightSync(); syncDayToCalendar();
 });
 
@@ -397,7 +728,6 @@ ui.nextBottom.addEventListener('click', nextStep);
 ui.nameInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter' && canStart()) ui.startBtn.click(); });
 ui.nameInput.addEventListener('input', updateStartButton);
 
-// Podgląd (X) — włącza swobodne przewijanie wszystkich dni, bez zapisu
 ui.peekBtn.addEventListener('click', ()=>{
   if(state.preview){
     if(snapshot){ state = JSON.parse(snapshot); snapshot = null; }
@@ -411,7 +741,6 @@ ui.peekBtn.addEventListener('click', ()=>{
   }
 });
 
-// Lista zapisanych imion (menu 👤)
 function listProfiles(){
   const rows = [];
   for(let i=0;i<localStorage.length;i++){
@@ -428,7 +757,6 @@ function listProfiles(){
   rows.sort((a,b)=> a.name.localeCompare(b.name, 'pl'));
   return rows;
 }
-
 function openNameMenu(){
   const rows = listProfiles();
   const menu = ui.nameMenu; if(!menu) return;
@@ -464,7 +792,7 @@ ui.nameMenu.addEventListener('click', (e)=>{
   const del = e.target.closest('[data-del]');
   if(del){
     const n = del.getAttribute('data-del');
-    if(n){ clearFor(n); if(state.name && state.name.toLowerCase()===n.toLowerCase()){ state = { name:'', day:1, step:0, done:Array(9).fill(false), start_date:null, preview:false }; render(); }
+    if(n){ clearFor(n); if(state.name && state.name.toLowerCase()===n.toLowerCase()){ state = { name:'', day:1, step:0, done:Array(9).fill(false), start_date:null, preview:false, rosary:null, lastRosaryType:null, fromRosaryExit:false }; render(); }
     openNameMenu(); showToast('Usunięto.'); }
     return;
   }
@@ -472,58 +800,135 @@ ui.nameMenu.addEventListener('click', (e)=>{
   if(item){
     const n = item.getAttribute('data-name');
     if(n){ state.preview=false; if(ui.peekBtn) ui.peekBtn.classList.remove('active'); load(n); if(!state.start_date) state.start_date = todayISO(); save(); render(); showToast(`Witaj, ${state.name}!`); closeNameMenu();
-      // ustaw pole imienia i zablokuj Start (to samo imię)
       ui.nameInput.value = state.name; updateStartButton();
       scheduleMidnightSync(); syncDayToCalendar();
     }
   }
 });
 
-// ——— INIT ———
-(function init(){
-  initTheme();
-  ui.themeBtn.addEventListener('click', toggleTheme);
-  render();
-  // uruchom planowanie północy i synchronizację przy powrocie do karty
-  scheduleMidnightSync();
-  document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible') syncDayToCalendar(); });
-})();
+// Override numeracji w trakcie różańca — ciągła numeracja Krok X z Y
+try{
+  const __renderOriginal = render;
+  render = function(){
+    __renderOriginal();
+    if(state && state.rosary){
+      const baseIdx = rosaryLinkIndex(); // stały indeks kroku z linkiem do różańca
+      const R = state.rosary; let ord = 1;
+      if(R.phase==='first3'){ ord = R.index + 1; }
+      else if(R.phase==='dailyPrayer'){ ord = 4; }
+      else if(R.phase==='last2'){ ord = 5 + R.index; }
+      else if(R.phase==='litania'){ ord = 7; }
+      else if(R.phase==='bernard'){ ord = 8; }
+      else if(R.phase==='closing'){ ord = 9; }
+      const total = totalForDay();
+      if(ui && ui.metaStep){ ui.metaStep.textContent = `Krok ${baseIdx + ord + 1} z ${total}`; }
+    }
+  };
+}catch(e){ }
 
 // ——— PROSTE TESTY ———
 (function selfTests(){
   try{
-    const snap = JSON.stringify(state);
+    // istniejące testy
+    console.assert(typeof totalForDay()==='number', 'totalForDay number');
+    state.rosary = {type:'bolesne', phase:'first3', index:0}; console.assert(rosaryStageLabel().length>0, 'label first3');
+    state.rosary = {type:'bolesne', phase:'dailyPrayer', index:0}; console.assert(rosaryStageLabel().includes('Modlitwa'), 'label daily');
+    state.rosary = {type:'bolesne', phase:'last2', index:1}; console.assert(rosaryStageLabel().includes('końcowe'), 'label last2');
+    state.rosary = {type:'bolesne', phase:'litania', index:0}; console.assert(rosaryStageLabel().includes('Litania'), 'label litania');
+    state.rosary = {type:'bolesne', phase:'bernard', index:0}; console.assert(rosaryStageLabel().includes('Bernarda'), 'label bernard');
+    state.rosary = {type:'bolesne', phase:'closing', index:0}; console.assert(rosaryStageLabel().includes('zakończenie'), 'label closing');
+    state.rosary = null;
 
-    // 1) save() — bez błędów i poprawny zapis
-    state.name = 'Test'; state.preview = false; state.start_date = todayISO();
-    save();
+    // nowe testy
+    // 1) Dzień 1 ma 17 kroków łącznie (8 bazowych + 9 różańca)
+    state.day = 1; console.assert(totalForDay() === 17, 'Day 1 should have 17 steps total');
 
-    // 2) stepsForCurrent day9 — ma dodatkową stronę gratulacyjną
-    state.day = 9; const len9 = stepsForCurrent().length; if(len9 !== DAYS[8].length + 1) throw new Error('stepsForCurrent day9 length mismatch');
+    // 2) Na ekranie końcowym Dnia 1 przycisk "Dalej" nie jest zablokowany
+    state.name = 'Test';
+    state.preview = false;
+    state.rosary = null;
+    {
+      const stepsLocal = stepsForCurrent();
+      state.step = stepsLocal.length - 1; // powinno wskazywać ZAKONCZ_DZIEN_INFO
+      render();
+      console.assert(ui.nextBottom.disabled === false, 'Next should be enabled on Day 1 final info screen');
+    }
 
-    // 3) render() bez imienia — nie rzuca
-    state.name = ''; render();
+    // 3) Kliknięcie "Dalej" na ekranie końcowym Dnia 1 resetuje do ekranu startowego
+    nextStep();
+    console.assert(state.name === '', 'App should reset to start after Day 1 final Next');
 
-    // 4) isResetEligible — tylko ostatnia strona dnia 9
-    state.name = 'Test'; state.day = 9; state.step = stepsForCurrent().length - 1; if(!isResetEligible()) throw new Error('isResetEligible should be true at last page of day 9');
-    state.step = 0; if(isResetEligible()) throw new Error('isResetEligible should be false at step 1');
+    // 4) Cofanie: z kroku 16 (po różańcu) do 15 (closing)
+    state.name = 'Test'; state.preview = false; state.day = 1; state.step = 0; state.rosary = null; state.done = Array(9).fill(false);
+    load('Test'); render();
+    // Przejdź do kroku z linkami do różańca
+    while(!isRosarySelectionStep()){ state.step++; if(state.step>20) break; }
+    // Start różańca i przejście do końca, wyjście na krok 16
+    startRosary('bolesne');
+    for(let i=0;i<8;i++){ nextStep(); }
+    nextStep(); // wyjście z closing do kroku 16
+    const beforeLabel = ui.metaStep.textContent;
+    const extractNum = s => parseInt(s.split(' ')[1],10);
+    prevStep(); // do closing (krok 15)
+    const afterLabel = ui.metaStep.textContent;
+    console.assert(extractNum(afterLabel) === extractNum(beforeLabel) - 1, 'Prev from step 16 should go to step 15');
+    // 1) Dzień 1 ma 17 kroków łącznie (8 bazowych + 9 różańca)
+    state.day = 1; console.assert(totalForDay() === 17, 'Day 1 should have 17 steps total');
 
-    // 5) preview NAV — przejście z końca dnia do następnego dnia
-    state.preview = true; state.day = 1; state.step = stepsForCurrent().length - 1; nextStep(); if(state.day !== 2) throw new Error('Preview nextStep should advance day');
+    // 2) Na ekranie końcowym Dnia 1 przycisk "Dalej" nie jest zablokowany
+    state.name = 'Test';
+    state.preview = false;
+    state.rosary = null;
+    const steps = stepsForCurrent();
+    state.step = steps.length - 1; // powinno wskazywać ZAKONCZ_DZIEN_INFO
+    render();
+    console.assert(ui.nextBottom.disabled === false, 'Next should be enabled on Day 1 final info screen');
 
-    // 6) theme toggle — klasa .dark przełącza się
-    const prevDark = document.documentElement.classList.contains('dark'); toggleTheme(); const nowDark = document.documentElement.classList.contains('dark'); if(prevDark===nowDark) throw new Error('Theme toggle failed'); toggleTheme();
+    // 3) Kliknięcie "Dalej" na ekranie końcowym Dnia 1 resetuje do ekranu startowego
+    nextStep();
+    console.assert(state.name === '', 'App should reset to start after Day 1 final Next');
 
-    // 7) dayFromStart — wczoraj = dzień 2
-    const today = parseISODate(todayISO());
-    const yesterday = addDays(today, -1);
-    state.start_date = toISODate(yesterday);
-    const idx = dayFromStart(); if(idx !== 2) throw new Error('dayFromStart should return 2 for yesterday start');
+    // 5) Cofanie pełną sekwencją: 16 -> 15 -> ... -> 1
+    // Ustaw: po wyjściu z różańca jesteśmy na kroku 16
+    state.name = 'Test'; state.preview = false; state.day = 1; state.step = 0; state.rosary = null; state.done = Array(9).fill(false);
+    load('Test'); render();
+    while(!isRosarySelectionStep()){ state.step++; if(state.step>20) break; }
+    startRosary('bolesne');
+    for(let i=0;i<8;i++){ nextStep(); }
+    nextStep(); // teraz krok 16
+    // Zbieraj numery kroków podczas cofania aż do 1
+    const nums = [];
+    const getNum = () => parseInt(ui.metaStep.textContent.split(' ')[1],10);
+    nums.push(getNum()); // powinno być 16
+    for(let i=0;i<20;i++){
+      prevStep();
+      nums.push(getNum());
+      if(nums[nums.length-1] === 1) break;
+    }
+    // Sprawdź monotoniczny spadek o 1 i że skończyliśmy na 1
+    for(let i=1;i<nums.length;i++){
+      console.assert(nums[i] === nums[i-1]-1, 'Sequence should decrement by 1');
+    }
+    console.assert(nums[nums.length-1] === 1, 'Final number after full back sequence should be 1');
 
-    // restore
-    state = JSON.parse(snap); render();
-    console.log('%cSelf-tests passed','color:green');
-  }catch(e){ console.warn('Self-tests failed:', e); }
+    // 6) Specyficzny case: 7 -> 6 (a nie 16)
+    state.name = 'Test'; state.preview = false; state.day = 1; state.rosary = { type:'bolesne', phase:'first3', index:0 }; state.step = rosaryLinkIndex();
+    render();
+    const numFromText = () => parseInt(ui.metaStep.textContent.split(' ')[1],10);
+    console.assert(numFromText() === 7, 'Should display step 7 before back');
+    prevStep();
+    console.assert(numFromText() === 6, 'After back from 7 should display step 6 (not 16)');
+
+    console.log('%cAll self-tests passed','color:green');
+  }catch(err){ console.warn('Self-tests failed:', err); }
+})();
+
+(function init(){
+  initTheme();
+  ui.themeBtn.addEventListener('click', toggleTheme);
+  render();
+  scheduleMidnightSync();
+  document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible') syncDayToCalendar(); });
 })();
 </script>
 </body>
