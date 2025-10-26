@@ -498,9 +498,10 @@ function displayStepNumberForBaseStep(baseIdx){
 function isRosarySelectionStep(){
   const steps = stepsForCurrent();
   const cur = steps[state.step];
-  // Zablokuj Next na ekranie wyboru tajemnic także w podglądzie
-  return !!state.name && !state.rosary && typeof cur === 'string' && cur.includes('data-rosary');
+  // Blokuj Next na ekranie wyboru tajemnic: przy zalogowanym imieniu ORAZ w podglądzie
+  return (state.name || state.preview) && !state.rosary && typeof cur === 'string' && cur.includes('data-rosary');
 }
+
 
 
 function isResetEligible(){
@@ -645,10 +646,17 @@ for (let i = 1; i <= 9; i++) {
   let disableNext = !canNavigate || (atLast  && !(state.preview && state.day<9));
   if(isRosarySelectionStep()) disableNext = true;
 
-  // Wyjątek: ekran końcowy — zawsze aktywny Next (reset tylko dla Dnia 1 i poza podglądem)
-  if (state.name && stepsArr && (stepsArr[state.step] === ZAKONCZ_DZIEN_INFO || stepsArr[state.step] === ZAKONCZ_DZIEN_GENERIC)) {
-    disableNext = false;
-  }
+// Wyjątek: ekrany końcowe — zawsze aktywny Next
+if (
+  state.name && stepsArr && (
+    stepsArr[state.step] === ZAKONCZ_DZIEN_INFO ||
+    stepsArr[state.step] === ZAKONCZ_DZIEN_GENERIC ||
+    stepsArr[state.step] === ZAKONCZ_DZIEN_FINAL
+  )
+){
+  disableNext = false;
+}
+
 
   ui.prevBottom.disabled = disablePrev;
   ui.nextBottom.disabled = disableNext;
