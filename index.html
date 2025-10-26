@@ -146,6 +146,12 @@ const ZAKONCZ_DZIEN_GENERIC = `
 <h3>Ukończyłeś ten dzień nowenny</h3>
 <p>Kliknij <em>Dalej</em>, aby wrócić do początku. Kolejny dzień otworzy się zgodnie z kalendarzem rozpoczęcia.</p>`;
 
+const ZAKONCZ_DZIEN_FINAL = `
+<h3>Ukończyłeś całą nowennę</h3>
+<p>Naciśnij <em>Dalej</em> lub <em>Reset</em>, aby zakończyć nowennę i powrócić do strony startowej.<br/>
+Niech Maryja prowadzi Cię dalej w codziennym życiu. 🌿</p>`;
+
+
 // --- Litania i modlitwa św. Bernarda (skrót) ---
 const LITANIA_LORETANSKA = `
 <h3>Litania Loretańska (skrót)</h3>
@@ -246,14 +252,15 @@ function buildDay(intencje, {finalInfo=false} = {}){
     PODZIEKOWANIE_MARYI
   ];
   if(finalInfo===true){
-    // specjalny ekran tylko dla Dnia 1 (z resetem)
     arr.push(ZAKONCZ_DZIEN_INFO);
   } else if(finalInfo==='generic'){
-    // zwykły ekran zakończenia dla dni 2–9
     arr.push(ZAKONCZ_DZIEN_GENERIC);
+  } else if(finalInfo==='final'){
+    arr.push(ZAKONCZ_DZIEN_FINAL);
   }
   return arr;
 }
+
 
 const DAYS = [
   // 1 — 4 modlitwy wstępne + intencja dnia
@@ -330,12 +337,13 @@ const DAYS = [
 
   // 9
   buildDay([
-    SEKWE,
-    SKLAD,
-    AKT_ZALU,
-    MODL_MARYJA,
-    'Dziękuję Ci, Panie, za wszystkie łaski na tej drodze.'
-  ], { finalInfo:'generic' })
+  SEKWE,
+  SKLAD,
+  AKT_ZALU,
+  MODL_MARYJA,
+  'Dziękuję Ci, Panie, za wszystkie łaski na tej drodze.'
+  ], { finalInfo:'final' })
+
 ];
 
 // --- UI refs i stan ---
