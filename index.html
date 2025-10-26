@@ -139,12 +139,14 @@ const PODZIEKOWANIE_MARYI = `
 <p>Maryjo, dziękuję Ci za Twoją opiekę i wstawiennictwo. Oddaję Tobie owoce tej modlitwy i proszę, prowadź mnie dalej drogą pokoju. Amen.</p>`;
 
 const ZAKONCZ_DZIEN_INFO = `
-<h3>Ukończyłeś pierwszy dzień nowenny</h3>
+<h3>Ukończyłeś ten dzień nowenny</h3>
 <p>Jutro, po zalogowaniu, otworzy się <strong>kolejny dzień nowenny</strong>. Kliknij <em>Dalej</em>, aby zakończyć dzień i wrócić do początku.</p>`;
 
-const ZAKONCZ_DZIEN_GENERIC = `
-<h3>Ukończyłeś ten dzień nowenny</h3>
-<p>Kliknij <em>Dalej</em>, aby wrócić do początku. Kolejny dzień otworzy się zgodnie z kalendarzem rozpoczęcia.</p>`;
+const ZAKONCZ_DZIEN_FINAL = `
+<h3>Ukończyłeś całą nowennę</h3>
+<p>Kliknij <em>Dalej</em> lub <em>Reset</em>, aby zakończyć nowennę i wrócić do strony startowej.<br/>
+Dziękujemy za Twoją wytrwałość i modlitwę. 🌿</p>`;
+
 
 // --- Litania i modlitwa św. Bernarda (skrót) ---
 const LITANIA_LORETANSKA = `
@@ -245,13 +247,14 @@ function buildDay(intencje, {finalInfo=false} = {}){
     mysteriesLinksHTML(),
     PODZIEKOWANIE_MARYI
   ];
-  if(finalInfo===true){
-    // specjalny ekran tylko dla Dnia 1 (z resetem)
-    arr.push(ZAKONCZ_DZIEN_INFO);
-  } else if(finalInfo==='generic'){
-    // zwykły ekran zakończenia dla dni 2–9
-    arr.push(ZAKONCZ_DZIEN_GENERIC);
-  }
+if(finalInfo===true){
+  arr.push(ZAKONCZ_DZIEN_INFO);
+} else if(finalInfo==='generic'){
+  arr.push(ZAKONCZ_DZIEN_GENERIC);
+} else if(finalInfo==='final'){
+  arr.push(ZAKONCZ_DZIEN_FINAL);
+}
+
   return arr;
 }
 
@@ -335,7 +338,7 @@ const DAYS = [
     AKT_ZALU,
     MODL_MARYJA,
     'Dziękuję Ci, Panie, za wszystkie łaski na tej drodze.'
-  ], { finalInfo:'generic' })
+  ], { finalInfo:'final' })
 ];
 
 // --- UI refs i stan ---
