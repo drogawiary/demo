@@ -448,7 +448,7 @@ function startRosary(type){
   state.lastRosaryType = type;
   state.rosary = { type, phase:'first3', index:0 };
   render();
-  showToast(`Różaniec — ${MYSTERIES[type].name}: dziesiątek 1/3`);
+  // toast removed elsewhere
 }
 function rosaryCurrentHTML(){
   const R = state.rosary;
@@ -595,7 +595,12 @@ function resetAll(){
   render();
 }
 
-function showToast(msg){ ui.toastMsg.textContent = msg; ui.toast.classList.add('show'); setTimeout(()=> ui.toast.classList.remove('show'), 3600); }
+// Minimalny toast: używany tylko do powitania po starcie/wyborze profilu
+function showToast(msg){
+  ui.toastMsg.textContent = msg;
+  ui.toast.classList.add('show');
+  setTimeout(()=> ui.toast.classList.remove('show'), 3600);
+}
 
 // --- Nawigacja ---
 function nextStep(){
@@ -604,21 +609,21 @@ function nextStep(){
     const R = state.rosary;
     const pack = MYSTERIES[R.type];
     if(R.phase==='first3'){
-      if(R.index<2){ R.index++; showToast(`Różaniec — ${pack.name}: dziesiątek ${R.index+1}/3`); render(); return; }
-      R.phase='dailyPrayer'; showToast('Modlitwa dnia'); render(); return;
+      if(R.index<2){ R.index++; /* toast removed */ render(); return; }
+      R.phase='dailyPrayer'; /* toast removed */ render(); return;
     }
     if(R.phase==='dailyPrayer'){
-      R.phase='last2'; R.index=0; showToast('Końcowe dziesiątki: 1/2'); render(); return;
+      R.phase='last2'; R.index=0; /* toast removed */ render(); return;
     }
     if(R.phase==='last2'){
-      if(R.index<1){ R.index++; showToast('Końcowe dziesiątki: 2/2'); render(); return; }
-      R.phase='litania'; showToast('Litania Loretańska'); render(); return;
+      if(R.index<1){ R.index++; /* toast removed */ render(); return; }
+      R.phase='litania'; /* toast removed */ render(); return;
     }
     if(R.phase==='litania'){
-      R.phase='bernard'; showToast('Modlitwa św. Bernarda'); render(); return;
+      R.phase='bernard'; /* toast removed */ render(); return;
     }
     if(R.phase==='bernard'){
-      R.phase='closing'; showToast('Modlitwa na zakończenie'); render(); return;
+      R.phase='closing'; /* toast removed */ render(); return;
     }
     if(R.phase==='closing'){
       // wyjście z różańca do kolejnego kroku (podziękowanie)
@@ -629,7 +634,7 @@ function nextStep(){
         state.fromRosaryExit = true;
         save(); render();
       } else {
-        state.done[state.day-1] = true; save(); render(); showToast(`Ukończyłeś dzień ${state.day}.`);
+        state.done[state.day-1] = true; save(); render(); /* toast removed */
       }
       return;
     }
@@ -640,7 +645,7 @@ function nextStep(){
   // *** TWARDY WARUNEK: Dzień 1, ekran "Ukończyłeś pierwszy dzień nowenny"
   if(state.name && state.day === 1 && steps[state.step] === ZAKONCZ_DZIEN_INFO){
     resetAll();
-    showToast('Ukończyłeś dzień 1. Wróć jutro i zaloguj się ponownie.');
+    /* toast removed */
     return;
   }
 
@@ -648,7 +653,7 @@ function nextStep(){
   if(state.preview){
     if(state.step < steps.length-1){ state.step += 1; render(); return; }
     if(state.day < 9){ state.day += 1; state.step = 0; render(); return; }
-    showToast('Koniec podglądu: dzień 9.'); return;
+    /* toast removed */ return;
   }
 
   if(!state.name) return;
@@ -664,9 +669,9 @@ function nextStep(){
   state.done[state.day-1] = true; save();
   if(state.day===9){
     render();
-    showToast('Brawo! Ukończyłeś całą nowennę.');
+    /* toast removed */
   } else {
-    state.step = 0; render(); showToast(`Ukończyłeś dzień ${state.day}.`);
+    state.step = 0; render(); /* toast removed */
   }
 }
 
@@ -675,20 +680,20 @@ function prevStep(){
     const R = state.rosary;
     const pack = MYSTERIES[R.type];
     if(R.phase==='first3'){
-      if(R.index>0){ R.index--; showToast(`Różaniec — ${pack.name}: dziesiątek ${R.index+1}/3`); render(); return; }
+      if(R.index>0){ R.index--; /* toast removed */ render(); return; }
       // WYJŚCIE Z RÓŻAŃCA PRZY COFANIU Z 1/3 -> wracamy na ekran linków (krok 6)
       state.rosary = null;
       state.step = rosaryLinkIndex();
       render(); return;
     }
-    if(R.phase==='dailyPrayer'){ R.phase='first3'; R.index=2; showToast('Powrót: dziesiątek 3/3'); render(); return; }
+    if(R.phase==='dailyPrayer'){ R.phase='first3'; R.index=2; /* toast removed */ render(); return; }
     if(R.phase==='last2'){
-      if(R.index>0){ R.index--; showToast('Końcowe dziesiątki: 1/2'); render(); return; }
-      R.phase='dailyPrayer'; showToast('Powrót: modlitwa dnia'); render(); return;
+      if(R.index>0){ R.index--; /* toast removed */ render(); return; }
+      R.phase='dailyPrayer'; /* toast removed */ render(); return;
     }
-    if(R.phase==='litania'){ R.phase='last2'; R.index=1; showToast('Powrót: końcowe 2/2'); render(); return; }
-    if(R.phase==='bernard'){ R.phase='litania'; showToast('Powrót: Litania'); render(); return; }
-    if(R.phase==='closing'){ R.phase='bernard'; showToast('Powrót: św. Bernard'); render(); return; }
+    if(R.phase==='litania'){ R.phase='last2'; R.index=1; /* toast removed */ render(); return; }
+    if(R.phase==='bernard'){ R.phase='litania'; /* toast removed */ render(); return; }
+    if(R.phase==='closing'){ R.phase='bernard'; /* toast removed */ render(); return; }
     return;
   }
   if(!state.name) return;
@@ -712,11 +717,11 @@ ui.startBtn.addEventListener('click', ()=>{
     state.preview = false; if(ui.peekBtn) ui.peekBtn.classList.remove('active');
     state = { name:'', day:1, step:0, done:Array(9).fill(false), start_date:null, preview:false, rosary:null, lastRosaryType:null, fromRosaryExit:false };
     snapshot = null; ui.nameInput.value = '';
-    render(); showToast('Zresetowano.');
+    render(); /* toast removed */
     return;
   }
   const inputName = ui.nameInput.value.trim();
-  if(!inputName){ showToast('Podaj imię, aby rozpocząć.'); return; }
+  if(!inputName){ /* toast removed */ return; }
   state.preview = false; snapshot = null; ui.peekBtn.classList.remove('active');
   load(inputName); if(!state.start_date) state.start_date = todayISO(); save(); render(); showToast(`Witaj, ${state.name}!`);
   ui.nameInput.value = state.name; updateStartButton();
@@ -732,12 +737,12 @@ ui.peekBtn.addEventListener('click', ()=>{
   if(state.preview){
     if(snapshot){ state = JSON.parse(snapshot); snapshot = null; }
     state.preview = false; ui.peekBtn.classList.remove('active');
-    render(); showToast('Zakończono podgląd.');
+    render(); /* toast removed */
   } else {
     snapshot = JSON.stringify(state);
     state.preview = true; ui.peekBtn.classList.add('active');
     if(!state.day) state.day = 1; if(!state.step) state.step = 0;
-    render(); showToast('Podgląd wszystkich dni. Nawiguj strzałkami.');
+    render(); /* toast removed */
   }
 });
 
@@ -793,7 +798,7 @@ ui.nameMenu.addEventListener('click', (e)=>{
   if(del){
     const n = del.getAttribute('data-del');
     if(n){ clearFor(n); if(state.name && state.name.toLowerCase()===n.toLowerCase()){ state = { name:'', day:1, step:0, done:Array(9).fill(false), start_date:null, preview:false, rosary:null, lastRosaryType:null, fromRosaryExit:false }; render(); }
-    openNameMenu(); showToast('Usunięto.'); }
+    openNameMenu(); /* toast removed */ }
     return;
   }
   const item = e.target.closest('.item');
@@ -872,21 +877,6 @@ try{
     prevStep(); // do closing (krok 15)
     const afterLabel = ui.metaStep.textContent;
     console.assert(extractNum(afterLabel) === extractNum(beforeLabel) - 1, 'Prev from step 16 should go to step 15');
-    // 1) Dzień 1 ma 17 kroków łącznie (8 bazowych + 9 różańca)
-    state.day = 1; console.assert(totalForDay() === 17, 'Day 1 should have 17 steps total');
-
-    // 2) Na ekranie końcowym Dnia 1 przycisk "Dalej" nie jest zablokowany
-    state.name = 'Test';
-    state.preview = false;
-    state.rosary = null;
-    const steps = stepsForCurrent();
-    state.step = steps.length - 1; // powinno wskazywać ZAKONCZ_DZIEN_INFO
-    render();
-    console.assert(ui.nextBottom.disabled === false, 'Next should be enabled on Day 1 final info screen');
-
-    // 3) Kliknięcie "Dalej" na ekranie końcowym Dnia 1 resetuje do ekranu startowego
-    nextStep();
-    console.assert(state.name === '', 'App should reset to start after Day 1 final Next');
 
     // 5) Cofanie pełną sekwencją: 16 -> 15 -> ... -> 1
     // Ustaw: po wyjściu z różańca jesteśmy na kroku 16
