@@ -113,6 +113,9 @@
 <script>
 'use strict';
 
+// 🔒 Tryb testów (blokuje zapisy do localStorage w czasie selfTests)
+let TESTING = false;
+
 // --- Bloki treści używane codziennie ---
 const SEKWE = `
 <h3>Sekwencja do Ducha Świętego</h3>
@@ -384,6 +387,7 @@ function keyFor(name){ return LS_PREFIX + name.toLowerCase().trim(); }
 function save(){
   if(!state.name) return;
   if(state.preview) return;
+  if(TESTING) return; // 🚫 brak zapisów podczas testów
   localStorage.setItem(keyFor(state.name), JSON.stringify({
     display_name: state.name,
     day:state.day,
@@ -620,12 +624,10 @@ for (let i = 1; i <= 9; i++) {
   dot.className = 'dot';
 
   if (state.name || state.preview) {
-    // Wypełnione są wszystkie dni wcześniejsze niż bieżący
-    // oraz bieżący dzień, jeśli użytkownik już wszedł w kroki
     const isDone =
-      !!(state.done[i - 1]) ||           // ukończone historycznie
-      i < state.day ||                   // wszystkie wcześniejsze dni
-      (i === state.day && (state.step > 0 || !!state.rosary)); // bieżący już rozpoczęty
+      !!(state.done[i - 1]) ||
+      i < state.day ||
+      (i === state.day && (state.step > 0 || !!state.rosary));
 
     if (isDone) dot.classList.add('done');
     if (i === state.day) dot.classList.add('current');
@@ -680,6 +682,7 @@ function resetAll(){
   state = { name:'', day:1, step:0, done:Array(9).fill(false), start_date:null, preview:false, rosary:null, lastRosaryType:null, fromRosaryExit:false };
   snapshot = null;
   ui.nameInput.value = '';
+  if(ui.peekBtn) ui.peekBtn.classList.remove('active');
   render();
 }
 
@@ -845,6 +848,7 @@ function listProfiles(){
     try{
       const d = JSON.parse(localStorage.getItem(k) || '{}');
       const name = d.display_name || k.slice(LS_PREFIX.length);
+      if(!name || /^\s*$/.test(name)) continue; // 🚫 pomiń puste nazwy
       const start = d.start_date ? formatPL(parseISODate(d.start_date)) : '—';
       const doneCount = Array.isArray(d.done) ? d.done.filter(Boolean).length : 0;
       rows.push({name, start, doneCount});
@@ -932,8 +936,12 @@ try{
 
 // ——— PROSTE TESTY ———
 (function selfTests(){
+  // 🛡️ Zapisz i przywróć pełny stan po testach + zablokuj zapisy do LS
+  const backupState = JSON.stringify(state);
+  const backupNameInput = ui.nameInput.value;
+  const backupPeekActive = ui.peekBtn.classList.contains('active');
+  TESTING = true;
   try{
-    // ISTNIEJĄCE TESTY (nie ruszać)
     console.assert(typeof totalForDay()==='number', 'totalForDay number');
     state.rosary = {type:'bolesne', phase:'first3', index:0}; console.assert(rosaryStageLabel().length>0, 'label first3');
     state.rosary = {type:'bolesne', phase:'dailyPrayer', index:0}; console.assert(rosaryStageLabel().includes('Modlitwa'), 'label daily');
@@ -943,7 +951,6 @@ try{
     state.rosary = {type:'bolesne', phase:'closing', index:0}; console.assert(rosaryStageLabel().includes('zakończenie'), 'label closing');
     state.rosary = null;
 
-    // NOWE TESTY
     // 1) Każdy dzień ma 17 kroków
     for(let d=1; d<=9; d++){
       state.day = d; state.name = 'Test'; state.step = 0; state.preview=false; state.rosary=null;
@@ -989,11 +996,25 @@ try{
 
     console.log('%cAll self-tests passed','color:green');
   }catch(err){ console.warn('Self-tests failed:', err); }
+  // 🔄 Przywróć czysty start i widok strony głównej
+  try{
+    state = JSON.parse(backupState);
+  }catch(_){
+    state = { name:'', day:1, step:0, done:Array(9).fill(false), start_date:null, preview:false, rosary:null, lastRosaryType:null, fromRosaryExit:false };
+  }
+  ui.nameInput.value = backupNameInput || '';
+  if(backupPeekActive) ui.peekBtn.classList.add('active'); else ui.peekBtn.classList.remove('active');
+  TESTING = false;
+  // Wymuś czysty ekran startowy
+  state.name = '';
+  state.preview = false;
+  state.rosary = null;
+  state.lastRosaryType = null;
+  render();
 })();
 
 (function init(){
   initTheme();
-  ui.themeBtn.addEventListener('click', toggleTheme);
   render();
   scheduleMidnightSync();
   document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible') syncDayToCalendar(); });
