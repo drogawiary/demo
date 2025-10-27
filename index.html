@@ -33,6 +33,21 @@
     --soft:#20254a;
     --chip:#272f63;
   }
+/* 🌙 Jasny maryjny kolor i delikatna poświata dla dni tygodnia (tryb nocny) */
+.dark .content a[data-rosary] {
+  color: #b9d5ff;              /* pastelowy maryjny błękit */
+  font-weight: 600;
+  text-shadow: 0 0 6px #4f7fff; /* subtelny efekt poświaty */
+  transition: all 0.3s ease;
+}
+
+.dark .content a[data-rosary]:hover {
+  color: #e3eeff;              /* jaśniejszy przy najechaniu */
+  text-shadow: 0 0 10px #a5c9ff, 0 0 20px #7fb3ff; /* efekt aurory */
+  text-decoration: underline;
+}
+
+  
   *{box-sizing:border-box}
   html,body{height:100%}
   body{margin:0; background:var(--bg); color:var(--text); font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial;}
