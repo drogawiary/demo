@@ -78,8 +78,19 @@
   color: #0e1533;
   font-weight: 700;
 }
-  
-  
+
+ /* ✝️ Styl dopisku o węźle w nowennie */
+.dark .wezel-info {
+  color: #cdd9ff;
+  text-shadow: 0 0 8px #7fa7ff, 0 0 16px #4f7fff; /* delikatny blask */
+}
+
+.wezel-info {
+  color: #24336b;
+  font-style: italic;
+  margin-top: 6px;
+}
+   
   *{box-sizing:border-box}
   html,body{height:100%}
   body{margin:0; background:var(--bg); color:var(--text); font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial;}
@@ -601,17 +612,18 @@ function buildDay(intencje, {finalInfo=false} = {}){
 
 const DAYS = [
   // 1 — 5 modlitw wstępnych (z intencją na pierwszym miejscu)
-  buildDay([
-  '<h3>Dzień 1 nowenny</h3><p>✝️ W imię Ojca i Syna i Ducha Świętego. Amen.<br/>Powierzam Ci, Panie, wszystkie węzły mojego życia.</p>',
-    SEKWE,
-    SKLAD,
-    AKT_ZALU,
-    MODL_MARYJA
-  ], { finalInfo:true }),
+buildDay([
+  '<h3>Dzień 1 nowenny</h3><p>✝️ W imię Ojca i Syna i Ducha Świętego. Amen.<br/>Powierzam Ci, Panie, wszystkie węzły mojego życia.</p><p class="wezel-info"><em>A w tej nowennie powierzam węzeł (…) </em></p>',
+  SEKWE,
+  SKLAD,
+  AKT_ZALU,
+  MODL_MARYJA
+], { finalInfo:true }),
+
 
   // 2 — 5 modlitw wstępnych (z intencją na pierwszym miejscu)
   buildDay([
-  '<h3>Dzień 2 nowenny</h3><p>✝️ W imię Ojca i Syna i Ducha Świętego. Amen.<br/>Powierzam Ci, Panie, wszystkie węzły mojego życia.</p>',
+  '<h3>Dzień 2 nowenny</h3><p>✝️ W imię Ojca i Syna i Ducha Świętego. Amen.<br/>Powierzam Ci, Panie, wszystkie węzły mojego życia.</p><p class="wezel-info"><em>A w tej nowennie powierzam węzeł (…) </em></p>',
     SEKWE,
     SKLAD,
     AKT_ZALU,
@@ -620,7 +632,7 @@ const DAYS = [
 
   // 3
   buildDay([
-  '<h3>Dzień 3 nowenny</h3><p>✝️ W imię Ojca i Syna i Ducha Świętego. Amen.<br/>Powierzam Ci, Panie, wszystkie węzły mojego życia.</p>',
+  '<h3>Dzień 3 nowenny</h3><p>✝️ W imię Ojca i Syna i Ducha Świętego. Amen.<br/>Powierzam Ci, Panie, wszystkie węzły mojego życia.</p><p class="wezel-info"><em>A w tej nowennie powierzam węzeł (…) </em></p>',
     SEKWE,
     SKLAD,
     AKT_ZALU,
@@ -629,7 +641,7 @@ const DAYS = [
 
   // 4
   buildDay([
-  '<h3>Dzień 4 nowenny</h3><p>✝️ W imię Ojca i Syna i Ducha Świętego. Amen.<br/>Powierzam Ci, Panie, wszystkie węzły mojego życia.</p>',
+  '<h3>Dzień 4 nowenny</h3><p>✝️ W imię Ojca i Syna i Ducha Świętego. Amen.<br/>Powierzam Ci, Panie, wszystkie węzły mojego życia.</p><p class="wezel-info"><em>A w tej nowennie powierzam węzeł (…) </em></p>',
     SEKWE,
     SKLAD,
     AKT_ZALU,
@@ -638,8 +650,7 @@ const DAYS = [
 
   // 5
   buildDay([
-  '<h3>Dzień 5 nowenny</h3><p>✝️ W imię Ojca i Syna i Ducha Świętego. Amen.<br/>Powierzam Ci, Panie, wszystkie węzły mojego życia.</p>',
-    SEKWE,
+  '<h3>Dzień 5 nowenny</h3><p>✝️ W imię Ojca i Syna i Ducha Świętego. Amen.<br/>Powierzam Ci, Panie, wszystkie węzły mojego życia.</p><p class="wezel-info"><em>A w tej nowennie powierzam węzeł (…) </em></p>',
     SKLAD,
     AKT_ZALU,
     MODL_MARYJA
@@ -647,7 +658,7 @@ const DAYS = [
 
   // 6
   buildDay([
-  '<h3>Dzień 6 nowenny</h3><p>✝️ W imię Ojca i Syna i Ducha Świętego. Amen.<br/>Powierzam Ci, Panie, wszystkie węzły mojego życia.</p>',
+  '<h3>Dzień 6 nowenny</h3><p>✝️ W imię Ojca i Syna i Ducha Świętego. Amen.<br/>Powierzam Ci, Panie, wszystkie węzły mojego życia.</p><p class="wezel-info"><em>A w tej nowennie powierzam węzeł (…) </em></p>',
     SEKWE,
     SKLAD,
     AKT_ZALU,
@@ -656,7 +667,7 @@ const DAYS = [
 
   // 7
   buildDay([
-  '<h3>Dzień 7 nowenny</h3><p>✝️ W imię Ojca i Syna i Ducha Świętego. Amen.<br/>Powierzam Ci, Panie, wszystkie węzły mojego życia.</p>',
+  '<h3>Dzień 7 nowenny</h3><p>✝️ W imię Ojca i Syna i Ducha Świętego. Amen.<br/>Powierzam Ci, Panie, wszystkie węzły mojego życia.</p><p class="wezel-info"><em>A w tej nowennie powierzam węzeł (…) </em></p>',
     SEKWE,
     SKLAD,
     AKT_ZALU,
@@ -665,8 +676,7 @@ const DAYS = [
 
   // 8
   buildDay([
-  '<h3>Dzień 8 nowenny</h3><p>✝️ W imię Ojca i Syna i Ducha Świętego. Amen.<br/>Powierzam Ci, Panie, wszystkie węzły mojego życia.</p>',
-    SEKWE,
+  '<h3>Dzień 8 nowenny</h3><p>✝️ W imię Ojca i Syna i Ducha Świętego. Amen.<br/>Powierzam Ci, Panie, wszystkie węzły mojego życia.</p><p class="wezel-info"><em>A w tej nowennie powierzam węzeł (…) </em></p>',
     SKLAD,
     AKT_ZALU,
     MODL_MARYJA
@@ -674,8 +684,7 @@ const DAYS = [
 
   // 9
   buildDay([
-  '<h3>Dzień 9 nowenny</h3><p>✝️ W imię Ojca i Syna i Ducha Świętego. Amen.<br/>Powierzam Ci, Panie, wszystkie węzły mojego życia.</p>',
-    SEKWE,
+  '<h3>Dzień 9 nowenny</h3><p>✝️ W imię Ojca i Syna i Ducha Świętego. Amen.<br/>Powierzam Ci, Panie, wszystkie węzły mojego życia.</p><p class="wezel-info"><em>A w tej nowennie powierzam węzeł (…) </em></p>',
     SKLAD,
     AKT_ZALU,
     MODL_MARYJA
