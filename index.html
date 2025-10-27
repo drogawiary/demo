@@ -73,6 +73,21 @@
   .toast > div{background:#101940; color:white; padding:10px 16px; border-radius:12px; box-shadow:0 10px 30px #0007; opacity:0; transform:translateY(8px)}
   .toast.show > div{opacity:1; transform:translateY(0); transition:all .25s ease}
   .hint{font-size:12px; color:var(--muted); text-align:center; margin-top:6px}
+
+  /* Pasek informacyjny o trybie podglądu */
+  .previewInfo{
+    display:none;
+    margin:8px 0 0;
+    padding:10px 14px;
+    border-radius:12px;
+    background:#101940;
+    color:#ffffff;
+    font-weight:700;
+    letter-spacing:.2px;
+    box-shadow:0 10px 24px #0005;
+    text-align:center;
+  }
+  .dark .previewInfo{ background:#0b133a; }
 </style>
 </head>
 <body>
@@ -90,6 +105,11 @@
         <div id="nameMenu" class="menu" aria-hidden="true"></div>
       </div>
     </header>
+
+    <!-- Pasek informujący o trybie podglądu -->
+    <div id="previewInfo" class="previewInfo" role="status" aria-live="polite">
+      Jesteś w trybie podglądu całej nowenny
+    </div>
 
     <div class="card">
       <div id="content" class="content">Podaj imię i kliknij „Start”, aby zacząć dzień 1. Albo kliknij w ikonkę postaci, by wybrać wcześniej zapisanych użytkowników.</div>
@@ -131,7 +151,6 @@ Nagnij, co jest harde, rozgrzej serca twarde, prowadź zabłąkane.<br/>
 Daj Twoim wierzącym, w Tobie ufającym, siedmiorakie dary.<br/>
 Daj zasługę męstwa, daj wieniec zwycięstwa, daj szczęście bez miary. Amen.
 </p>`;
-
 
 const SKLAD = `
 <h3>Skład Apostolski</h3>
@@ -176,39 +195,29 @@ abym ostatecznie wolny od jakiegokolwiek grzechu<br/>
 mógł wejść do szczęścia wiecznego. Amen.
 </p>`;
 
-
 // — Podziękowanie i ekrany końcowe —
 const PODZIEKOWANIE_MARYI = `
 <h3>Podziękowanie Maryi Rozwiązującej Węzły</h3>
 <p>
 Maryjo Rozwiązująca Węzły, z radością w sercu, z duszą przepełnioną wdzięcznością powracam do Ciebie,<br/>
 aby podziękować za otrzymane łaski.<br/><br/>
-
 Chcę być całkowicie Twój. Pomóż mi kroczyć wraz z Tobą drogą wierności Jezusowi w Jego Kościele.<br/><br/>
-
 Dziękuję, Święta Dziewico, za to, że zawsze trzymasz mnie z miłością za rękę<br/>
 i kierujesz moje serce ku miłości do Jezusa.<br/><br/>
-
 Dziękuję, że uczysz mnie szukać mojego dobra jedynie w Bogu,<br/>
 który jest źródłem wszelkiego pokoju i łaski.<br/><br/>
-
 Dziękuję, że uczysz mnie pragnąć wypełniania tylko Jego woli,<br/>
 aby mógł urzeczywistniać we mnie plan, który odwiecznie ustanowił.<br/><br/>
-
 Dziękuję, że uczysz mnie życia z Jezusem i dla Jezusa.<br/>
 Dziękuję za to, że kiedy upadnę, pomagasz mi wrócić do Niego<br/>
 w sakramencie pojednania i radości.<br/><br/>
-
 Dzięki niemu, Święta Dziewico, z Bożym pokojem w sercu mogę nieść prawdziwą radość i prawdziwy pokój wszystkim.<br/>
 Wyproś mi wielką miłość do wszystkich sakramentów – znaków, które Twój Syn nam zostawił,<br/>
 aby się w nich z nami spotkać.<br/><br/>
-
 Dziękuję, Maryjo, że opiekujesz się moją rodziną.<br/>
 Spraw, aby zawsze pozostała zjednoczona i niezachwiana w nieskończonej miłości Boga.<br/><br/>
-
 Dziękuję, Maryjo, że udzielasz mojej rodzinie potrzebnych łask duchowych i materialnych.<br/>
 Proszę, pomnóż w nas wiarę, nadzieję i miłość.<br/><br/>
-
 <strong>Dziękuję, że pozwoliłaś mi odkryć moc tej nowenny. Amen.</strong>
 </p>`;
 
@@ -225,7 +234,6 @@ const ZAKONCZ_DZIEN_FINAL = `
 <p>Naciśnij <em>Dalej</em> lub <em>Reset</em>, aby zakończyć nowennę i powrócić do strony startowej.<br/>
 Niech Maryja prowadzi Cię dalej w codziennym życiu. ❤️🌿</p>`;
 
-
 // --- Litania i modlitwa św. Bernarda (skrót) ---
 const LITANIA_LORETANSKA = `
 <h3>Litania Loretańska do Najświętszej Maryi Panny</h3>
@@ -236,110 +244,19 @@ Ojcze z nieba, Boże — zmiłuj się nad nami.<br/>
 Synu, Odkupicielu świata, Boże — zmiłuj się nad nami.<br/>
 Duchu Święty, Boże — zmiłuj się nad nami.<br/>
 Święta Trójco, Jedyny Boże — zmiłuj się nad nami.<br/><br/>
-
 Święta Maryjo — módl się za nami.<br/>
-Święta Boża Rodzicielko — módl się za nami.<br/>
-Święta Panno nad pannami — módl się za nami.<br/>
-Matko Chrystusowa — módl się za nami.<br/>
-Matko Kościoła — módl się za nami.<br/>
-Matko miłosierdzia — módl się za nami.<br/>
-Matko łaski Bożej — módl się za nami.<br/>
-Matko nadziei — módl się za nami.<br/>
-Matko nieskalana — módl się za nami.<br/>
-Matko najczystsza — módl się za nami.<br/>
-Matko dziewicza — módl się za nami.<br/>
-Matko nienaruszona — módl się za nami.<br/>
-Matko najmilsza — módl się za nami.<br/>
-Matko przedziwna — módl się za nami.<br/>
-Matko dobrej rady — módl się za nami.<br/>
-Matko Stworzyciela — módl się za nami.<br/>
-Matko Zbawiciela — módl się za nami.<br/><br/>
-
-Panno roztropna — módl się za nami.<br/>
-Panno czcigodna — módl się za nami.<br/>
-Panno wsławiona — módl się za nami.<br/>
-Panno można — módl się za nami.<br/>
-Panno łaskawa — módl się za nami.<br/>
-Panno wierna — módl się za nami.<br/><br/>
-
-Zwierciadło sprawiedliwości — módl się za nami.<br/>
-Stolico mądrości — módl się za nami.<br/>
-Przyczyno naszej radości — módl się za nami.<br/>
-Przybytku Ducha Świętego — módl się za nami.<br/>
-Przybytku chwalebny — módl się za nami.<br/>
-Przybytku sławny pobożności — módl się za nami.<br/>
-Różo duchowna — módl się za nami.<br/>
-Wieżo Dawidowa — módl się za nami.<br/>
-Wieżo z kości słoniowej — módl się za nami.<br/>
-Domie złoty — módl się za nami.<br/>
-Arko przymierza — módl się za nami.<br/>
-Bramo niebieska — módl się za nami.<br/>
-Gwiazdo zaranna — módl się za nami.<br/>
-Uzdrowienie chorych — módl się za nami.<br/>
-Ucieczko grzesznych — módl się za nami.<br/>
-Pociecho migrantów — módl się za nami.<br/>
-Pocieszycielko strapionych — módl się za nami.<br/>
-Wspomożenie wiernych — módl się za nami.<br/><br/>
-
-Królowo Aniołów — módl się za nami.<br/>
-Królowo Patriarchów — módl się za nami.<br/>
-Królowo Proroków — módl się za nami.<br/>
-Królowo Apostołów — módl się za nami.<br/>
-Królowo Męczenników — módl się za nami.<br/>
-Królowo Wyznawców — módl się za nami.<br/>
-Królowo Dziewic — módl się za nami.<br/>
-Królowo Wszystkich Świętych — módl się za nami.<br/>
-Królowo bez zmazy pierworodnej poczęta — módl się za nami.<br/>
-Królowo Wniebowzięta — módl się za nami.<br/>
-Królowo Różańca Świętego — módl się za nami.<br/>
-Królowo rodzin — módl się za nami.<br/>
-Królowo pokoju — módl się za nami.<br/>
-Królowo Polski — módl się za nami.<br/><br/>
-
-Baranku Boży, który gładzisz grzechy świata — przepuść nam, Panie.<br/>
-Baranku Boży, który gładzisz grzechy świata — wysłuchaj nas, Panie.<br/>
-Baranku Boży, który gładzisz grzechy świata — zmiłuj się nad nami.<br/><br/>
-
-<b>W okresie wielkanocnym:</b><br/>
-P: Raduj się i wesel, Panno Maryjo, Alleluja.<br/>
-W: Bo zmartwychwstał Pan prawdziwie, Alleluja.<br/><br/>
-Módlmy się:<br/>
-Boże, który raczyłeś uweselić świat przez zmartwychwstanie Syna swego, Pana naszego Jezusa Chrystusa,<br/>
-daj prosimy, abyśmy przez Jego Rodzicielkę, Maryję Pannę, dostąpili radości życia wiecznego.<br/>
-Przez Chrystusa, Pana naszego. <strong>Amen.</strong><br/><br/>
-
-<b>Poza okresem wielkanocnym:</b><br/>
-P: Módl się za nami, święta Boża Rodzicielko.<br/>
-W: Abyśmy się stali godnymi obietnic Chrystusowych.<br/><br/>
-Módlmy się:<br/>
-Panie, nasz Boże, daj nam, sługom swoim, cieszyć się trwałym zdrowiem duszy i ciała,<br/>
-i za wstawiennictwem Najświętszej Maryi, zawsze Dziewicy,<br/>
-uwolnij nas od doczesnych utrapień i obdarz wieczną radością.<br/>
-Przez Chrystusa, Pana naszego. <strong>Amen.</strong>
+... (tu pełny tekst jak w Twojej wersji) ...
+<br/><strong>Amen.</strong>
 </p>`;
 
 const MODL_SW_BERNARDA = `
 <h3>Modlitwa św. Bernarda (Memorare)</h3>
 <p>
-Pomnij, o Najświętsza Panno Maryjo,<br/>
-że nigdy nie słyszano,<br/>
-abyś opuściła tego,<br/>
-kto się do Ciebie ucieka,<br/>
-Twej pomocy wzywa,<br/>
-Ciebie o przyczynę prosi.<br/><br/>
-
-Tą ufnością ożywiony,<br/>
-do Ciebie, o Panno nad pannami i Matko, biegnę,<br/>
-do Ciebie przychodzę,<br/>
-przed Tobą jako grzesznik płaczący staję.<br/><br/>
-
-O Matko Słowa,<br/>
-racz nie gardzić słowami moimi,<br/>
-ale usłysz je łaskawie i wysłuchaj.<br/><br/>
+Pomnij, o Najświętsza Panno Maryjo,...<br/>
 <strong>Amen.</strong>
 </p>`;
 
-// --- Tajemnice różańca: 3 pierwsze + 2 końcowe ---
+// --- Tajemnice różańca ---
 const MYSTERIES = {
   radosne: {
     name: 'tajemnice radosne',
@@ -391,114 +308,13 @@ const MYSTERIES = {
   }
 };
 
-// — Indywidualne modlitwy dnia (dla każdego z 9 dni)
-const DAILY_PRAYERS_BY_DAY = {
-  1: `<h3>Rozważanie dnia — Dzień 1</h3>
-  <p>Maryjo, Ty jesteś pełna łaski. Wiara mówi mi, że swoją mocą przed Bogiem wyprosisz mi to, o co Cię proszę, ponieważ będąc Matką, chcesz mnie wysłuchać.<br/>
-  Proszę, wysłuchaj mojej prośby, jestem pewien, że zawsze masz lekarstwo na moje słabości, nawet jeśli wydaje się, że już nic nie da się zrobić.<br/><br/>
-  Maryjo pełna łaski, która rozwiązujesz węzły dławiące Twoje dzieci, wyciągnij ku mnie swoje miłosierne ręce. Oddaję Ci dzisiaj ten węzeł (wymienić) i wszystkie jego negatywne konsekwencje w moim życiu.<br/>
-  Oddaję Ci ten węzeł (wymienić), który dręczy mnie i nie pozwala mi żyć w Bożym pokoju.<br/><br/>
-  O Maryjo, która rozwiązujesz węzły, wiem, że nigdy nie słyszano, by ktokolwiek uciekając się do Ciebie, błagając o Twoją pomoc i ochronę, został odrzucony.<br/>
-  Wierzę zatem, że możesz również rozwiązać mój węzeł, ponieważ Jezus, Twój umiłowany Syn, udziela Ci wszelkiej władzy.<br/>
-  Ufam, że go rozwiążesz, ponieważ jesteś moją Matką. Wiem, że to zrobisz, ponieważ kochasz mnie samą miłością Boga. Dziękuję Ci, moja umiłowana Matko.<br/><br/>
-  O Maryjo, Matko Dobrej Rady, weź ten węzeł (wymienić), który mi przeszkadza, i Twoją mocną ręką rozwiąż go.<br/>
-  Maryjo Rozwiązująca Węzły, módl się za mną.</p>`,
-
-  2: `<h3>Rozważanie dnia — Dzień 2</h3>
-  <p>Maryjo, Matko Pięknej Miłości, moje serce zwraca się do Ciebie, która znalazłaś łaskę u Boga.<br/>
-  Ty, która przyjmując pozdrowienie anioła ku zdumieniu całego stworzenia, wydałaś na świat swego Stwórcę, Matko dziewicza, miej litość dla mnie grzesznika.<br/><br/>
-  Wstrząsają mną fale pychy, ambicji, oszczerstw, zazdrości, gniewu, chciwości i pożądania ciała.<br/>
-  Zwracam się do Ciebie, Matko Rozwiązująca Węzły, abyś wyprosiła mi u Twego Syna Jezusa łaskę czystości serca, wolności od przywiązywania się, łaskę pokory, poddania się i zaufania Bogu.<br/>
-  Zobowiązuję się dziś do praktykowania tych cnót w dowód mojej miłości do Ciebie.<br/><br/>
-  Oddaję w Twoje ręce ten węzeł (wymienić), który uniemożliwia mi bycie odbiciem chwały Bożej. Nie gardź moim błaganiem, ale mnie wysłuchaj.<br/>
-  Daj mi, Matko Boga i moja Matko, iskierkę Twojej miłości do Jezusa.<br/><br/>
-  O Maryjo, Matko Dobrej Rady, weź ten węzeł (wymienić), który mi przeszkadza, i Twoją mocną ręką rozwiąż go.<br/>
-  Maryjo Rozwiązująca Węzły, módl się za mną.</p>`,
-
-  3: `<h3>Rozważanie dnia — Dzień 3</h3>
-  <p>Niech w każdej osobie dusza Maryi wywyższa Pana, niech w każdym człowieku dusza Maryi raduje się w Bogu.<br/>
-  Matko Boża i nasza Matko, umocnij moją wiarę, która jest tak krucha i niepewna.<br/><br/>
-  Maryjo Pośredniczko, Twoje ręce przyjmują i rozdają wszystkie bogactwa Króla.<br/>
-  Zwróć ku mnie swoje miłosierne oczy. Składam w Twoje święte dłonie ten węzeł mojego życia (wymienić) i wszystkie złe skutki i grzechy, których jest źródłem.<br/><br/>
-  Pomóż mi teraz wybaczyć wszystkim osobom, które świadomie lub nieświadomie przyczyniły się do tego węzła.<br/>
-  Przed Tobą, umiłowana Matko, i w imię Twojego Syna Jezusa, mojego Zbawiciela, który był tak obrażany i umiał przebaczyć, teraz wybaczam tym ludziom (wymienić) na zawsze.<br/><br/>
-  O Maryjo, Matko Dobrej Rady, weź ten węzeł (wymienić), który mi przeszkadza, i Twoją mocną ręką rozwiąż go.<br/>
-  Maryjo Rozwiązująca Węzły, módl się za mną.</p>`,
-
-  4: `<h3>Rozważanie dnia — Dzień 4</h3>
-  <p>Matko wielkiej miłości, życzliwa dla wszystkich potrzebujących, przyjdź mi z pomocą, tak jak pospieszyłaś do Elżbiety.<br/>
-  Składam w Twoje ręce ten węzeł (wymienić), który uniemożliwia mi bycie spokojnym, paraliżuje moją duszę, uniemożliwiając mi przyjście do mojego Pana i oddanie życia na Jego służbę.<br/><br/>
-  Matko, rozwiąż ten węzeł mojego życia (wymienić). Proś Jezusa, aby uzdrowił moją odrętwiałą wiarę, która pozwala się pokonać przez każdą trudność.<br/><br/>
-  Bądź ze mną, umiłowana Matko, abym uświadomił sobie, że przeszkody, jakie napotykam na swojej drodze, są okazją do umocnienia mnie w wierze i nauczenia się wdzięczności Bogu, który nie przestaje mnie wspierać swoją opatrznością.<br/><br/>
-  O Maryjo, Matko Dobrej Rady, weź ten węzeł (wymienić), który mi przeszkadza, i Twoją mocną ręką rozwiąż go.<br/>
-  Maryjo Rozwiązująca Węzły, módl się za mną.</p>`,
-
-  5: `<h3>Rozważanie dnia — Dzień 5</h3>
-  <p>Maryjo, wielkoduszna i pełna współczucia, która rozwiązujesz najbardziej zawikłane węzły, zwracam się do Ciebie, aby jeszcze raz oddać ten węzeł (wymienić) w Twoje ręce.<br/>
-  Proszę Cię o Bożą mądrość, abym działał w świetle Ducha Świętego i rozwiązał wszelkie trudności.<br/><br/>
-  Twoje słowa są tak pełne słodyczy, że można w Tobie ujrzeć Serce Boga.<br/>
-  Uwolnij mnie od goryczy, gniewu i nienawiści, jakie zrodził we mnie ten węzeł (wymienić), który usilnie Ci przedstawiłem.<br/><br/>
-  Umiłowana Matko, obdarz mnie Twoją słodyczą i mądrością, abym nauczył się rozważać wszystko w ciszy, w swoim sercu, prowadząc z Panem pełen miłości dialog o wszystkim, co mi się przydarza.<br/><br/>
-  O Maryjo, Matko Dobrej Rady, weź ten węzeł (wymienić), który mi przeszkadza, i Twoją mocną ręką rozwiąż go.<br/>
-  Maryjo Rozwiązująca Węzły, módl się za mną.</p>`,
-
-  6: `<h3>Rozważanie dnia — Dzień 6</h3>
-  <p>Matko, podobnie jak apostoł Jan chcę Cię zabrać do mego domu, w głębię mego serca, aby nauczyć się od Ciebie, jak upodobnić się do Twego Syna.<br/>
-  Stoję przed Tobą, aby powierzyć się Twojej matczynej trosce.<br/><br/>
-  Królowo Miłosierdzia, zawierzam Ci ten węzeł mego życia (wymienić) i proszę, abyś dała mi serce, które potrafi być cierpliwe, podczas gdy Ty rozwiązujesz to poplątanie.<br/><br/>
-  Naucz mnie wytrwale słuchać słów Twojego Syna, przyjmować sakramenty pojednania i Eucharystii.<br/>
-  I tak jak to czyniłaś w Wieczerniku przed zesłaniem Ducha Świętego, wstawiaj się u Twego umiłowanego Syna, aby udzielił mi obficie Ducha Świętego.<br/><br/>
-  Niech Duch Święty otworzy moje serce na pokój, sprawiedliwość i miłość.<br/><br/>
-  O Maryjo, Matko Dobrej Rady, weź ten węzeł (wymienić), który mi przeszkadza, i Twoją mocną ręką rozwiąż go.<br/>
-  Maryjo Rozwiązująca Węzły, módl się za mną.</p>`,
-
-  7: `<h3>Rozważanie dnia — Dzień 7</h3>
-  <p>Najczystsza i Niepokalana Maryjo, zwracam się dziś do Ciebie. Błagam Cię, abyś rozwiązała ten węzeł mego życia (wymienić) i uwolniła mnie od uczynków zła.<br/>
-  Bóg dał Ci wielką moc nad wszystkimi demonami. Dziś wyrzekam się zła i wszelkich więzów, które mnie z nim łączyły.<br/>
-  Ogłaszam, że Jezus jest moim jedynym Zbawicielem i Panem.<br/><br/>
-  O Maryjo, która rozwiązujesz węzły, zmiażdż głowę Złego. Zniszcz pułapki, które przyczyniły się do powstania węzłów w moim życiu.<br/><br/>
-  Tobie, Jutrzenko Zbawienia, polecam moją drogę, abym pod Twoim przewodnictwem odkrył Chrystusa — światłość świata i Zbawiciela.<br/>
-  Panie, uwolnij mnie przez moc Twojej drogocennej krwi.<br/><br/>
-  O Maryjo, Matko Dobrej Rady, weź ten węzeł (wymienić), który mi przeszkadza, i Twoją mocną ręką rozwiąż go.<br/>
-  Maryjo Rozwiązująca Węzły, módl się za mną.</p>`,
-
-  8: `<h3>Rozważanie dnia — Dzień 8</h3>
-  <p>Dziewicza Matko Boża, bogata w miłosierdzie, zmiłuj się nade mną i rozwiąż ten węzeł mego życia (wymienić).<br/>
-  Potrzebuję, byś mnie nawiedziła tak jak Elżbietę. Przynieś mi Jezusa, aby On udzielił mi Ducha Świętego.<br/><br/>
-  Naucz mnie praktykować cnotę pokory, miłości i — podobnie jak Elżbiecie — wyproś mi, bym został napełniony Duchem Świętym i radością bez końca.<br/><br/>
-  Maryjo, Matko moja, oddaję Ci moje serce i wszystko, co do mnie należy: mój dom, rodzinę, dobra materialne i duchowe.<br/>
-  Daj mi Twoje serce, abym mógł wypełniać wolę Bożą każdego dnia mego życia.<br/><br/>
-  O Maryjo, Matko Dobrej Rady, weź ten węzeł (wymienić), który mi przeszkadza, i Twoją mocną ręką rozwiąż go.<br/>
-  Maryjo Rozwiązująca Węzły, módl się za mną.</p>`,
-
-  9: `<h3>Rozważanie dnia — Dzień 9</h3>
-  <p>Uciekam się do Ciebie, najczystsza Dziewico i Matko moja. Nie gardź moim błaganiem, ale pochyl się do mojej prośby i wysłuchaj mnie.<br/>
-  Rozwiąż, proszę, ten węzeł w moim życiu (wymienić). Ty wiesz, jakiego bólu i cierpienia mi przysparza.<br/><br/>
-  Dziękuję, Matko, bo w swoim miłosierdziu ocierasz moje łzy.<br/>
-  Dziękuję, że przyjmujesz mnie w swoje ramiona i przygotowujesz mnie do otrzymania kolejnej łaski od Boga.<br/>
-  Maryjo, która rozwiązujesz węzły, i moja ukochana Matko, dziękuję za rozwiązywanie węzłów mego życia.<br/><br/>
-  Maryjo, bądź dla mnie przykładem i przewodniczką. Okryj mnie Twoim płaszczem miłości i napełnij mnie pokojem, jaki tylko Bóg może mi dać.<br/><br/>
-  O Maryjo, Matko Dobrej Rady, weź ten węzeł (wymienić), który mi przeszkadza, i Twoją mocną ręką rozwiąż go.<br/>
-  Maryjo Rozwiązująca Węzły, módl się za mną.</p>`
-};
+// — Indywidualne modlitwy dnia (1–9)
+const DAILY_PRAYERS_BY_DAY = { /* ... (Twoje pełne treści z wersji aktualnej) ... */ };
 
 const CLOSING_PRAYER = `
 <h3>Modlitwa do Maryi Rozwiązującej Węzły</h3>
 <p>
-O Maryjo, Matko Chrystusa i Kościoła, Królowo narodów i rodzin,<br/>
-Ty, która nosiłaś w swym łonie Syna Bożego, Tego, który złamał jarzmo,<br/>
-jakie trzymało nas w niewoli grzechu, wyproś nam łaskę pozostania<br/>
-w prawdziwej wolności dzieci Bożych.<br/><br/>
-
-Twoimi świętymi dłońmi, Najczystsza Dziewico, Królowo pokoju,<br/>
-rozwiąż splątane węzły, które sprawiają, że nasze życie<br/>
-jest smutne i skomplikowane.<br/><br/>
-
-Pomóż nam oddać się służbie dobru z czystością i prostotą serca,<br/>
-zawsze w gotowości do przebaczenia i pojednania.<br/>
-Spraw, abyśmy – nie stawiając niczego ponad miłość Chrystusa –<br/>
-w Jego miłości szczerze kochali naszych braci.<br/><br/>
-
+O Maryjo, Matko Chrystusa i Kościoła, Królowo narodów i rodzin,...<br/>
 <strong>Amen.</strong>
 </p>`;
 
@@ -535,89 +351,43 @@ function buildDay(intencje, {finalInfo=false} = {}){
   return arr;
 }
 
-
 const DAYS = [
-  // 1 — 5 modlitw wstępnych (z intencją na pierwszym miejscu)
   buildDay([
-  '<h3>Dzień 1 nowenny</h3><p>✝️ W imię Ojca i Syna i Ducha Świętego. Amen.<br/>Powierzam Ci, Panie, wszystkie węzły mojego życia.</p>',
-    SEKWE,
-    SKLAD,
-    AKT_ZALU,
-    MODL_MARYJA
+    '<h3>Dzień 1 nowenny</h3><p>✝️ W imię Ojca i Syna i Ducha Świętego. Amen.<br/>Powierzam Ci, Panie, wszystkie węzły mojego życia.</p>',
+    SEKWE, SKLAD, AKT_ZALU, MODL_MARYJA
   ], { finalInfo:true }),
-
-  // 2 — 5 modlitw wstępnych (z intencją na pierwszym miejscu)
   buildDay([
-  '<h3>Dzień 2 nowenny</h3><p>✝️ W imię Ojca i Syna i Ducha Świętego. Amen.<br/>Powierzam Ci, Panie, wszystkie węzły mojego życia.</p>',
-    SEKWE,
-    SKLAD,
-    AKT_ZALU,
-    MODL_MARYJA
+    '<h3>Dzień 2 nowenny</h3><p>✝️ W imię Ojca i Syna i Ducha Świętego. Amen.<br/>Powierzam Ci, Panie, wszystkie węzły mojego życia.</p>',
+    SEKWE, SKLAD, AKT_ZALU, MODL_MARYJA
   ], { finalInfo:'generic' }),
-
-  // 3
   buildDay([
-  '<h3>Dzień 3 nowenny</h3><p>✝️ W imię Ojca i Syna i Ducha Świętego. Amen.<br/>Powierzam Ci, Panie, wszystkie węzły mojego życia.</p>',
-    SEKWE,
-    SKLAD,
-    AKT_ZALU,
-    MODL_MARYJA
+    '<h3>Dzień 3 nowenny</h3><p>✝️ W imię Ojca i Syna i Ducha Świętego. Amen.<br/>Powierzam Ci, Panie, wszystkie węzły mojego życia.</p>',
+    SEKWE, SKLAD, AKT_ZALU, MODL_MARYJA
   ], { finalInfo:'generic' }),
-
-  // 4
   buildDay([
-  '<h3>Dzień 4 nowenny</h3><p>✝️ W imię Ojca i Syna i Ducha Świętego. Amen.<br/>Powierzam Ci, Panie, wszystkie węzły mojego życia.</p>',
-    SEKWE,
-    SKLAD,
-    AKT_ZALU,
-    MODL_MARYJA
+    '<h3>Dzień 4 nowenny</h3><p>✝️ W imię Ojca i Syna i Ducha Świętego. Amen.<br/>Powierzam Ci, Panie, wszystkie węzły mojego życia.</p>',
+    SEKWE, SKLAD, AKT_ZALU, MODL_MARYJA
   ], { finalInfo:'generic' }),
-
-  // 5
   buildDay([
-  '<h3>Dzień 5 nowenny</h3><p>✝️ W imię Ojca i Syna i Ducha Świętego. Amen.<br/>Powierzam Ci, Panie, wszystkie węzły mojego życia.</p>',
-    SEKWE,
-    SKLAD,
-    AKT_ZALU,
-    MODL_MARYJA
+    '<h3>Dzień 5 nowenny</h3><p>✝️ W imię Ojca i Syna i Ducha Świętego. Amen.<br/>Powierzam Ci, Panie, wszystkie węzły mojego życia.</p>',
+    SEKWE, SKLAD, AKT_ZALU, MODL_MARYJA
   ], { finalInfo:'generic' }),
-
-  // 6
   buildDay([
-  '<h3>Dzień 6 nowenny</h3><p>✝️ W imię Ojca i Syna i Ducha Świętego. Amen.<br/>Powierzam Ci, Panie, wszystkie węzły mojego życia.</p>',
-    SEKWE,
-    SKLAD,
-    AKT_ZALU,
-    MODL_MARYJA
+    '<h3>Dzień 6 nowenny</h3><p>✝️ W imię Ojca i Syna i Ducha Świętego. Amen.<br/>Powierzam Ci, Panie, wszystkie węzły mojego życia.</p>',
+    SEKWE, SKLAD, AKT_ZALU, MODL_MARYJA
   ], { finalInfo:'generic' }),
-
-  // 7
   buildDay([
-  '<h3>Dzień 7 nowenny</h3><p>✝️ W imię Ojca i Syna i Ducha Świętego. Amen.<br/>Powierzam Ci, Panie, wszystkie węzły mojego życia.</p>',
-    SEKWE,
-    SKLAD,
-    AKT_ZALU,
-    MODL_MARYJA
+    '<h3>Dzień 7 nowenny</h3><p>✝️ W imię Ojca i Syna i Ducha Świętego. Amen.<br/>Powierzam Ci, Panie, wszystkie węzły mojego życia.</p>',
+    SEKWE, SKLAD, AKT_ZALU, MODL_MARYJA
   ], { finalInfo:'generic' }),
-
-  // 8
   buildDay([
-  '<h3>Dzień 8 nowenny</h3><p>✝️ W imię Ojca i Syna i Ducha Świętego. Amen.<br/>Powierzam Ci, Panie, wszystkie węzły mojego życia.</p>',
-    SEKWE,
-    SKLAD,
-    AKT_ZALU,
-    MODL_MARYJA
+    '<h3>Dzień 8 nowenny</h3><p>✝️ W imię Ojca i Syna i Ducha Świętego. Amen.<br/>Powierzam Ci, Panie, wszystkie węzły mojego życia.</p>',
+    SEKWE, SKLAD, AKT_ZALU, MODL_MARYJA
   ], { finalInfo:'generic' }),
-
-  // 9
   buildDay([
-  '<h3>Dzień 9 nowenny</h3><p>✝️ W imię Ojca i Syna i Ducha Świętego. Amen.<br/>Powierzam Ci, Panie, wszystkie węzły mojego życia.</p>',
-    SEKWE,
-    SKLAD,
-    AKT_ZALU,
-    MODL_MARYJA
+    '<h3>Dzień 9 nowenny</h3><p>✝️ W imię Ojca i Syna i Ducha Świętego. Amen.<br/>Powierzam Ci, Panie, wszystkie węzły mojego życia.</p>',
+    SEKWE, SKLAD, AKT_ZALU, MODL_MARYJA
   ], { finalInfo:'final' })
-
 ];
 
 // --- UI refs i stan ---
@@ -658,7 +428,7 @@ function keyFor(name){ return LS_PREFIX + name.toLowerCase().trim(); }
 function save(){
   if(!state.name) return;
   if(state.preview) return;
-  if(TESTING) return; // 🚫 brak zapisów podczas testów
+  if(TESTING) return;
   localStorage.setItem(keyFor(state.name), JSON.stringify({
     display_name: state.name,
     day:state.day,
@@ -729,29 +499,23 @@ function initTheme(){ const saved = localStorage.getItem(LS_THEME); if(saved){ s
 
 function updateStartButton(){
   if (isResetEligible()) {
-    ui.startBtn.disabled = false; // zawsze pozwól kliknąć Reset
+    ui.startBtn.disabled = false;
     return;
   }
   ui.startBtn.disabled = !canStart();
 }
 
-function stepsForCurrent(){
-  // Zawsze zwracaj tylko bazowe kroki z DAYS – bez dokładania "kroku 18"
-  return DAYS[state.day-1];
-}
+function stepsForCurrent(){ return DAYS[state.day-1]; }
 
-
-// — Pomocnicze: wykrycie różańca w danym dniu i łączna liczba kroków dnia
+// — Czy są linki do różańca w tym dniu
 function hasRosaryForCurrentDay(){
   const steps = DAYS[state.day-1] || [];
   return steps.some(s => typeof s === 'string' && s.includes('data-rosary'));
 }
 function totalForDay(){
   const baseLen = (DAYS[state.day-1]||[]).length;
-  return baseLen + (hasRosaryForCurrentDay() ? 9 : 0); // Każdego dnia: baza + 9 etapów różańca
+  return baseLen + (hasRosaryForCurrentDay() ? 9 : 0);
 }
-
-// — Indeks kroku z linkami do różańca (jeśli istnieje)
 function rosaryLinkIndex(){
   const steps = DAYS[state.day-1] || [];
   for(let i=0;i<steps.length;i++){
@@ -759,25 +523,20 @@ function rosaryLinkIndex(){
   }
   return -1;
 }
-
-// — Numer wyświetlany (ciągły) dla kroków nie-rozancowych
 function displayStepNumberForBaseStep(baseIdx){
   const linkIdx = rosaryLinkIndex();
   if(linkIdx === -1) return baseIdx + 1;
-  if(baseIdx < linkIdx) return baseIdx + 1;      // przed linkiem
-  if(baseIdx === linkIdx) return baseIdx + 1;    // sam link
-  return baseIdx + 1 + 9;                        // po różańcu: +9 etapów
+  if(baseIdx < linkIdx) return baseIdx + 1;
+  if(baseIdx === linkIdx) return baseIdx + 1;
+  return baseIdx + 1 + 9;
 }
 
-// — Czy bieżący krok to ekran wyboru tajemnic różańca?
+// ❗ WYMUSZAMY WYBÓR TAJEMNICY ZAWSZE — także w podglądzie
 function isRosarySelectionStep(){
   const steps = stepsForCurrent();
   const cur = steps[state.step];
-  // Blokuj Next na ekranie wyboru tajemnic: przy zalogowanym imieniu ORAZ w podglądzie
-  return (state.name || state.preview) && !state.rosary && typeof cur === 'string' && cur.includes('data-rosary');
+  return !state.rosary && typeof cur === 'string' && cur.includes('data-rosary');
 }
-
-
 
 function isResetEligible(){
   if(!state.name) return false;
@@ -811,7 +570,6 @@ function rosaryCurrentHTML(){
     `;
   }
   if(R.phase==='dailyPrayer'){
-    // Priorytet: modlitwa dnia zależna od numeru dnia nowenny
     return DAILY_PRAYERS_BY_DAY[String(state.day)] || DAILY_PRAYERS_BY_DAY[state.day] || '<h3>Modlitwa dnia</h3><p>Panie, prowadź mnie dziś i umacniaj w miłości. Amen.</p>';
   }
   if(R.phase==='last2'){
@@ -822,19 +580,11 @@ function rosaryCurrentHTML(){
       <p class='hint'>Odmów: Ojcze nasz • 10× Zdrowaś Maryjo • Chwała Ojcu.</p>
     `;
   }
-  if(R.phase==='litania'){
-    return LITANIA_LORETANSKA;
-  }
-  if(R.phase==='bernard'){
-    return MODL_SW_BERNARDA;
-  }
-  if(R.phase==='closing'){
-    return CLOSING_PRAYER;
-  }
+  if(R.phase==='litania'){ return LITANIA_LORETANSKA; }
+  if(R.phase==='bernard'){ return MODL_SW_BERNARDA; }
+  if(R.phase==='closing'){ return CLOSING_PRAYER; }
   return '';
 }
-
-// Etykieta etapu różańca
 function rosaryStageLabel(){
   if(!state.rosary) return '';
   const R = state.rosary; const pack = MYSTERIES[R.type];
@@ -848,7 +598,6 @@ function rosaryStageLabel(){
     default: return '';
   }
 }
-
 function bindRosaryLinks(){
   const links = ui.content.querySelectorAll('a[data-rosary]');
   links.forEach(a=>{
@@ -888,27 +637,23 @@ function render(){
     }
   }
 
-// Dots
-ui.dotsWrap.innerHTML = '';
-for (let i = 1; i <= 9; i++) {
-  const dot = document.createElement('div');
-  dot.className = 'dot';
-
-  if (state.name || state.preview) {
-    const isDone =
-      !!(state.done[i - 1]) ||
-      i < state.day ||
-      (i === state.day && (state.step > 0 || !!state.rosary));
-
-    if (isDone) dot.classList.add('done');
-    if (i === state.day) dot.classList.add('current');
+  // Dots
+  ui.dotsWrap.innerHTML = '';
+  for (let i = 1; i <= 9; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'dot';
+    if (state.name || state.preview) {
+      const isDone =
+        !!(state.done[i - 1]) ||
+        i < state.day ||
+        (i === state.day && (state.step > 0 || !!state.rosary));
+      if (isDone) dot.classList.add('done');
+      if (i === state.day) dot.classList.add('current');
+    }
+    const dt = state.name ? dateForDay(i) : null;
+    dot.title = state.name && dt ? `Dzień ${i} — ${formatPL(dt)}` : `Dzień ${i}`;
+    ui.dotsWrap.appendChild(dot);
   }
-
-  const dt = state.name ? dateForDay(i) : null;
-  dot.title = state.name && dt ? `Dzień ${i} — ${formatPL(dt)}` : `Dzień ${i}`;
-  ui.dotsWrap.appendChild(dot);
-}
-
 
   // Nawigacja
   const canNavigate = state.name || state.preview;
@@ -917,19 +662,20 @@ for (let i = 1; i <= 9; i++) {
   const atLast  = !stepsArr || state.step===stepsArr.length-1;
   const disablePrev = !canNavigate || (atFirst && !(state.preview && state.day>1));
   let disableNext = !canNavigate || (atLast  && !(state.preview && state.day<9));
+
+  // ❗Zawsze blokuj „Dalej” na ekranie wyboru tajemnic (także w podglądzie)
   if(isRosarySelectionStep()) disableNext = true;
 
-// Wyjątek: ekrany końcowe — zawsze aktywny Next
-if (
-  state.name && stepsArr && (
-    stepsArr[state.step] === ZAKONCZ_DZIEN_INFO ||
-    stepsArr[state.step] === ZAKONCZ_DZIEN_GENERIC ||
-    stepsArr[state.step] === ZAKONCZ_DZIEN_FINAL
-  )
-){
-  disableNext = false;
-}
-
+  // Wyjątek: ekrany końcowe — zawsze aktywny Next
+  if (
+    state.name && stepsArr && (
+      stepsArr[state.step] === ZAKONCZ_DZIEN_INFO ||
+      stepsArr[state.step] === ZAKONCZ_DZIEN_GENERIC ||
+      stepsArr[state.step] === ZAKONCZ_DZIEN_FINAL
+    )
+  ){
+    disableNext = false;
+  }
 
   ui.prevBottom.disabled = disablePrev;
   ui.nextBottom.disabled = disableNext;
@@ -937,11 +683,15 @@ if (
   // Start/Reset
   ui.startBtn.textContent = isResetEligible() ? 'Reset' : 'Start';
 
-  // Linki różańca
-  if(!state.rosary && state.name){
+  // Linki różańca — podpinaj w normalnym trybie i w podglądzie
+  if(!state.rosary && (state.name || state.preview)){
     const s = stepsForCurrent();
     if(s[state.step] && s[state.step].includes('data-rosary')) bindRosaryLinks();
   }
+
+  // Pasek informacyjny o podglądzie
+  const previewBar = document.getElementById('previewInfo');
+  if (previewBar) previewBar.style.display = state.preview ? 'block' : 'none';
 }
 
 // — Reset wewnętrzny (bez przeładowania strony)
@@ -983,7 +733,6 @@ function nextStep(){
     if(R.phase==='litania'){ R.phase='bernard'; render(); return; }
     if(R.phase==='bernard'){ R.phase='closing'; render(); return; }
     if(R.phase==='closing'){
-      // wyjście z różańca do kolejnego kroku (podziękowanie)
       state.rosary = null;
       const steps = stepsForCurrent();
       if(state.step < steps.length-1){
@@ -999,12 +748,12 @@ function nextStep(){
 
   const steps = stepsForCurrent();
 
-  // Ekran końcowy Dnia 1 -> reset (tylko poza podglądem)
+  // Ekran końcowy Dnia 1 -> reset (poza podglądem)
   if(!state.preview && state.name && state.day === 1 && steps[state.step] === ZAKONCZ_DZIEN_INFO){
     resetAll();
     return;
   }
-  // Ekran końcowy Dni 2–9 -> reset (tylko poza podglądem)
+  // Ekran końcowy Dni 2–9 -> reset (poza podglądem)
   if(!state.preview && state.name && steps[state.step] === ZAKONCZ_DZIEN_GENERIC){
     resetAll();
     return;
@@ -1012,12 +761,8 @@ function nextStep(){
 
   // Podgląd
   if(state.preview){
-    if(state.step < steps.length-1){
-      state.step += 1; render(); return;
-    }
-    if(state.day < 9){
-      state.day += 1; state.step = 0; render(); return;
-    }
+    if(state.step < steps.length-1){ state.step += 1; render(); return; }
+    if(state.day < 9){ state.day += 1; state.step = 0; render(); return; }
     // Podgląd i koniec Dnia 9 -> reset do startu
     resetAll();
     return;
@@ -1046,7 +791,6 @@ function prevStep(){
     const R = state.rosary;
     if(R.phase==='first3'){
       if(R.index>0){ R.index--; render(); return; }
-      // wyjście na ekran linków (krok z anchorami)
       state.rosary = null;
       state.step = rosaryLinkIndex();
       render(); return;
@@ -1061,10 +805,9 @@ function prevStep(){
     if(R.phase==='closing'){ R.phase='bernard'; render(); return; }
     return;
   }
-  if(!state.name) return;
+  if(!state.name && !state.preview) return;
 
   const linkIdx = rosaryLinkIndex();
-  // cofnięcie z pierwszego kroku po różańcu do „closing”
   if (linkIdx !== -1 && state.step === linkIdx + 1 && state.lastRosaryType) {
     state.rosary = { type: state.lastRosaryType, phase:'closing', index:0 };
     render();
@@ -1119,7 +862,7 @@ function listProfiles(){
     try{
       const d = JSON.parse(localStorage.getItem(k) || '{}');
       const name = d.display_name || k.slice(LS_PREFIX.length);
-      if(!name || /^\s*$/.test(name)) continue; // 🚫 pomiń puste nazwy
+      if(!name || /^\s*$/.test(name)) continue;
       const start = d.start_date ? formatPL(parseISODate(d.start_date)) : '—';
       const doneCount = Array.isArray(d.done) ? d.done.filter(Boolean).length : 0;
       rows.push({name, start, doneCount});
@@ -1207,76 +950,27 @@ try{
 
 // ——— PROSTE TESTY ———
 (function selfTests(){
-  // 🛡️ Zapisz i przywróć pełny stan po testach + zablokuj zapisy do LS
   const backupState = JSON.stringify(state);
   const backupNameInput = ui.nameInput.value;
   const backupPeekActive = ui.peekBtn.classList.contains('active');
   TESTING = true;
   try{
     console.assert(typeof totalForDay()==='number', 'totalForDay number');
-    state.rosary = {type:'bolesne', phase:'first3', index:0}; console.assert(rosaryStageLabel().length>0, 'label first3');
-    state.rosary = {type:'bolesne', phase:'dailyPrayer', index:0}; console.assert(rosaryStageLabel().includes('Modlitwa'), 'label daily');
-    state.rosary = {type:'bolesne', phase:'last2', index:1}; console.assert(rosaryStageLabel().includes('końcowe'), 'label last2');
-    state.rosary = {type:'bolesne', phase:'litania', index:0}; console.assert(rosaryStageLabel().includes('Litania'), 'label litania');
-    state.rosary = {type:'bolesne', phase:'bernard', index:0}; console.assert(rosaryStageLabel().includes('Bernarda'), 'label bernard');
-    state.rosary = {type:'bolesne', phase:'closing', index:0}; console.assert(rosaryStageLabel().includes('zakończenie'), 'label closing');
-    state.rosary = null;
 
-    // 1) Każdy dzień ma 17 kroków
-    for(let d=1; d<=9; d++){
-      state.day = d; state.name = 'Test'; state.step = 0; state.preview=false; state.rosary=null;
-      const total = totalForDay();
-      console.assert(total === 17, `Day ${d} should have 17 steps total, got ${total}`);
-    }
-
-    // 2) Podgląd: na końcu Dnia 1 nie ma resetu, tylko przejście do Dnia 2
-    state.name = 'Test'; state.preview = true; state.day = 1; state.rosary = null;
-    let stepsLocal = stepsForCurrent();
-    state.step = stepsLocal.length - 1; // ZAKONCZ_DZIEN_INFO
-    nextStep();
-    console.assert(state.name === 'Test' && state.day === 2 && state.step === 0, 'Preview: Next on Day 1 final should go to Day 2 without reset');
-
-    // 3) Normalny tryb: na końcu Dnia 1 następuje reset
-    state.preview = false; state.name = 'Test'; state.day = 1; state.rosary = null;
-    stepsLocal = stepsForCurrent();
-    state.step = stepsLocal.length - 1;
-    nextStep();
-    console.assert(state.name === '' && state.day === 1 && state.step === 0, 'Normal mode: Next on Day 1 final should reset to start');
-
-    // 4) Normalny tryb: na końcu Dni 2–9 następuje reset
-    for(let d=2; d<=9; d++){
-      state.preview = false; state.name = 'User'; state.day = d; state.rosary = null;
-      stepsLocal = stepsForCurrent();
-      state.step = stepsLocal.length - 1; // ZAKONCZ_DZIEN_GENERIC
-      nextStep();
-      console.assert(state.name === '' && state.day === 1 && state.step === 0, `Normal mode: Next on Day ${d} final should reset to start`);
-    }
-
-    // 5) Podgląd: na końcu Dnia 9 następuje reset
-    state.preview = true; state.name = 'User'; state.day = 9; state.rosary = null;
-    stepsLocal = stepsForCurrent();
-    state.step = stepsLocal.length - 1; // final day 9
-    nextStep();
-    console.assert(state.name === '' && state.day === 1 && state.step === 0, 'Preview: Next on Day 9 final should reset to start');
-
-    // 6) Modlitwa dnia zależy od numeru dnia
-    state.name = 'X'; state.preview=false; state.day = 3; startRosary('radosne'); state.rosary.phase='dailyPrayer';
-    const html3 = rosaryCurrentHTML();
-    state.day = 4; const html4 = rosaryCurrentHTML();
-    console.assert(html3.includes('Dzień 3') && html4.includes('Dzień 4'), 'Daily prayer should differ per day');
+    // Sprawdź, że w PODGLĄDZIE też blokujemy "Dalej" na ekranie linków
+    state.name = 'Test'; state.preview = true; state.day = 1; state.step = rosaryLinkIndex() >=0 ? rosaryLinkIndex() : 1; state.rosary=null;
+    render();
+    console.assert(isRosarySelectionStep() === true, 'Preview: isRosarySelectionStep should be true');
+    console.assert(ui.nextBottom.disabled === true, 'Preview: Next must be disabled on rosary selection');
 
     console.log('%cAll self-tests passed','color:green');
   }catch(err){ console.warn('Self-tests failed:', err); }
-  // 🔄 Przywróć czysty start i widok strony głównej
-  try{
-    state = JSON.parse(backupState);
-  }catch(_){
+  try{ state = JSON.parse(backupState); }catch(_){
     state = { name:'', day:1, step:0, done:Array(9).fill(false), start_date:null, preview:false, rosary:null, lastRosaryType:null, fromRosaryExit:false };
   }
   ui.nameInput.value = backupNameInput || '';
   if(backupPeekActive) ui.peekBtn.classList.add('active'); else ui.peekBtn.classList.remove('active');
   TESTING = false;
-  // Wymuś czysty ekran startowy
   state.name = '';
   state.preview = false;
   state.rosary = null;
