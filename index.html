@@ -63,6 +63,21 @@
   color: #0e1533;
   font-weight: 700;
 }
+
+/* 💎 Poświata i pogrubienie dla tytułów tajemnic różańca w trybie nocnym */
+.dark .content h4,
+.dark .content strong {
+  color: #dbe4ff;
+  font-weight: 700;
+  text-shadow: 0 0 8px #7fa7ff, 0 0 16px #4f7fff; /* maryjna poświata */
+}
+
+/* W dzień – tylko mocniejszy kontrast, bez świecenia */
+.content h4,
+.content strong {
+  color: #0e1533;
+  font-weight: 700;
+}
   
   
   *{box-sizing:border-box}
