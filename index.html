@@ -64,6 +64,23 @@
   font-weight: 700;
 }
 
+/* ℹ️ Karta opisu nowenny */
+.infoBox{
+  background: var(--panel);
+  border: 1px solid #ffffff22;
+  border-radius: 14px;
+  padding: 14px;
+  line-height: 1.65;
+}
+.dark .infoBox{
+  background: #101940;
+  border-color: #3a55ff40;
+  box-shadow: 0 0 14px #2e4aff80;
+  color: #e8edff;
+  text-shadow: 0 0 6px #7fa7ff;
+}
+
+  
 /* 💎 Poświata i pogrubienie dla tytułów tajemnic różańca w trybie nocnym */
 .dark .content h4,
 .dark .content strong {
@@ -577,6 +594,23 @@ w Jego miłości szczerze kochali naszych braci.<br/><br/>
 <strong>Amen.</strong>
 </p>`;
 
+const NOVENNA_INFO = `
+  <h3>O nowennie do Maryi Rozwiązującej Węzły</h3>
+  <p>Nowenna trwa 9 dni. Każdego dnia rozpoczynasz modlitwą wstępną, a następnie przechodzisz
+  przez dziesiątki różańca właściwe dla dnia tygodnia (radosne, bolesne, chwalebne, światła).
+  Po trzech pierwszych dziesiątkach odmawiasz krótką modlitwę dnia, potem dwa końcowe dziesiątki,
+  następnie Litanię Loretańską, modlitwę św. Bernarda oraz modlitwę na zakończenie.</p>
+  <p>W każdym dniu możesz dopisać swoją intencję – <em>„węzeł”</em> –
+  którą powierzysz Maryi: <strong>A w tej nowennie powierzam węzeł (…)</strong></p>
+  <ul>
+    <li><b>Wstecz/Dalej</b> prowadzą krok po kroku.</li>
+    <li>Wybór tajemnic pojawia się w środku dnia – należy kliknąć właściwy dzień tygodnia.</li>
+    <li>Po ukończeniu dnia aplikacja wraca do startu i otworzy następny dzień zgodnie z kalendarzem.</li>
+  </ul>
+  <p class='hint'>Aby kontynuować, kliknij <b>Dalej</b>.</p>
+`;
+
+  
 function mysteriesLinksHTML(){
   return `
   <h3>Części różańca (tajemnice z dnia)</h3>
@@ -713,17 +747,29 @@ const ui = {
   nameMenu: document.getElementById('nameMenu')
 };
 
-let state = {
-  name: '',
-  day: 1,
-  step: 0,
-  done: Array(9).fill(false),
-  start_date: null,
-  preview: false,
-  rosary: null,
-  lastRosaryType: null,
-  fromRosaryExit: false
-};
+function start(){
+  const name = ui.nameInput.value.trim();
+  if(!name){
+    // 💬 brak imienia → uruchamiamy tryb demo
+    snapshot = JSON.stringify(state);
+    state.preview = true;
+    state.day = 1;
+    state.step = 0;
+    ui.peekBtn.classList.add('active');
+    render();
+    return;
+  }
+  
+  // normalny tryb użytkownika
+  state.name = name;
+  state.preview = false;
+  state.day = 1;
+  state.step = 0;
+  save();
+  render();
+}
+
+
 let snapshot = null;
 
 function keyFor(name){ return LS_PREFIX + name.toLowerCase().trim(); }
@@ -921,6 +967,21 @@ function render(){
     ui.metaDay.textContent = 'Dzień –';
     ui.metaStep.textContent = 'Krok –/–';
   } else {
+
+// ——— tryb opisu ———
+if (state.info) {
+  ui.content.innerHTML = `<div class="infoBox">${NOVENNA_INFO}</div>`;
+  ui.metaDay.textContent = 'Opis nowenny';
+  ui.metaStep.textContent = '—';
+  // blokada Wstecz, aktywne Dalej
+  ui.prevBottom.disabled = true;
+  ui.nextBottom.disabled = false;
+  // Pasek podglądu wyłączony w trybie info
+  const previewBar = document.getElementById('previewInfo');
+  if (previewBar) previewBar.style.display = 'none';
+  return; // ⬅️ już narysowane, wychodzimy
+}
+    
     if(state.rosary){
       ui.content.innerHTML = rosaryCurrentHTML();
       const d = dateForDay(state.day);
@@ -1018,6 +1079,17 @@ function showToast(msg){
 
 // --- Nawigacja ---
 function nextStep(){
+// ✳️ Jeśli jesteśmy w opisie, Dalej = zamknij opis i wróć
+if (state.info) {
+  state.info = false;
+  if (infoSnapshot) {
+    try { state = JSON.parse(infoSnapshot); } catch(_) {}
+    infoSnapshot = null;
+  }
+  render();
+  return;
+}
+  
   // Różaniec — wewnętrzna ścieżka
   if(state.rosary){
     const R = state.rosary;
@@ -1143,18 +1215,16 @@ ui.nextBottom.addEventListener('click', nextStep);
 ui.nameInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter' && canStart()) ui.startBtn.click(); });
 ui.nameInput.addEventListener('input', updateStartButton);
 
-ui.peekBtn.addEventListener('click', ()=>{
-  if(state.preview){
-    if(snapshot){ state = JSON.parse(snapshot); snapshot = null; }
-    state.preview = false; ui.peekBtn.classList.remove('active');
-    render();
-  } else {
-    snapshot = JSON.stringify(state);
-    state.preview = true; ui.peekBtn.classList.add('active');
-    if(!state.day) state.day = 1; if(!state.step) state.step = 0;
-    render();
-  }
+ui.peekBtn.addEventListener('click', ()=> {
+  // zapamiętaj dokładnie, gdzie jesteś (również różaniec)
+  infoSnapshot = JSON.stringify(state);
+  state.info = true;
+  // (opcjonalnie) wizualna aktywność przycisku
+  ui.peekBtn.classList.add('active');
+  render();
+  // po wyjściu z info (Dalej) przycisk przestanie być aktywny w renderze bazowym
 });
+
 
 function listProfiles(){
   const rows = [];
