@@ -918,45 +918,47 @@ function bindRosaryLinks(){
   });
 }
 
-// --- Render ---
 function render(){
   updateStartButton();
 
-  if (state.name) {
-  // 🆕 tryb opisu (intro)
-  if (state.intro) {
-    ui.content.innerHTML = INTRO_HTML;
-    const d = dateForDay(state.day);
-    const dateStr = d ? formatPL(d) : '_';
-    ui.metaDay.textContent = `Dzień ${state.day} z 9 – ${dateStr}`;
-    ui.metaStep.textContent = `Opis`;
+  const logged = !!state.name || state.preview;
+
+  // nic nie wpisano / nie zaczęto
+  if (!logged) {
+    // zostawiasz swój tekst startowy w HTML – tylko metadane i kropki:
+    ui.metaDay.textContent  = 'Dzień —';
+    ui.metaStep.textContent = 'Krok —/—';
   } else {
-    // ✨ Twój dotychczasowy kod
-    ui.content.innerHTML = MAIN_HTML;
-    const d = dateForDay(state.day);
-    const dateStr = d ? formatPL(d) : '_';
-    ui.metaDay.textContent = `Dzień ${state.day} z 9 – ${dateStr}`;
-    ui.metaStep.textContent = `Krok ${state.step} z ${totalForDay()}`;
-  } else {
-    if(state.rosary){
+    // — tryb OPISU —
+    if (state.intro) {
+      ui.content.innerHTML = INTRO_HTML;
+      const d = dateForDay(state.day);
+      const dateStr = d ? formatPL(d) : '—';
+      ui.metaDay.textContent  = `Dzień ${state.day} z 9 — ${dateStr}`;
+      ui.metaStep.textContent = 'Opis';
+    }
+    // — różaniec (wewnętrzna ścieżka) —
+    else if (state.rosary) {
       ui.content.innerHTML = rosaryCurrentHTML();
       const d = dateForDay(state.day);
       const dateStr = d ? formatPL(d) : '—';
-      ui.metaDay.textContent = `Dzień ${state.day} z 9 — ${dateStr}`;
+      ui.metaDay.textContent  = `Dzień ${state.day} z 9 — ${dateStr}`;
       ui.metaStep.textContent = `Krok … z ${totalForDay()}`;
-    } else {
+    }
+    // — zwykłe kroki dnia —
+    else {
       const steps = stepsForCurrent();
-      const safeStep = Math.max(0, Math.min(state.step, steps.length-1));
+      const safeStep = Math.max(0, Math.min(state.step, steps.length - 1));
       state.step = safeStep;
       ui.content.innerHTML = steps[safeStep];
       const d = dateForDay(state.day);
       const dateStr = d ? formatPL(d) : '—';
-      ui.metaDay.textContent = `Dzień ${state.day} z 9 — ${dateStr}`;
+      ui.metaDay.textContent  = `Dzień ${state.day} z 9 — ${dateStr}`;
       ui.metaStep.textContent = `Krok ${displayStepNumberForBaseStep(safeStep)} z ${totalForDay()}`;
     }
   }
 
-  // Dots
+  // — kropki — 
   ui.dotsWrap.innerHTML = '';
   for (let i = 1; i <= 9; i++) {
     const dot = document.createElement('div');
@@ -974,44 +976,45 @@ function render(){
     ui.dotsWrap.appendChild(dot);
   }
 
-  // Nawigacja
+  // — nawigacja —
   const canNavigate = state.name || state.preview;
   const stepsArr = canNavigate ? stepsForCurrent() : null;
-  const atFirst = !stepsArr || state.step===0;
-  const atLast  = !stepsArr || state.step===stepsArr.length-1;
-  const disablePrev = !canNavigate || (atFirst && !(state.preview && state.day>1));
-  let disableNext = !canNavigate || (atLast  && !(state.preview && state.day<9));
+  const atFirst  = !stepsArr || state.step === 0;
+  const atLast   = !stepsArr || state.step === (stepsArr.length - 1);
 
-  // ❗Zawsze blokuj „Dalej” na ekranie wyboru tajemnic (także w podglądzie)
-  if(isRosarySelectionStep()) disableNext = true;
+  const disablePrev = !canNavigate || (atFirst && !(state.preview && state.day > 1));
+  let   disableNext = !canNavigate || (atLast  && !(state.preview && state.day < 9));
 
-  // Wyjątek: ekrany końcowe — zawsze aktywny Next
+  // blokuj Next na ekranie wyboru tajemnic
+  if (isRosarySelectionStep()) disableNext = true;
+
+  // ekrany końcowe — Next aktywny
   if (
     state.name && stepsArr && (
-      stepsArr[state.step] === ZAKONCZ_DZIEN_INFO ||
-      stepsArr[state.step] === ZAKONCZ_DZIEN_GENERIC ||
+      stepsArr[state.step] === ZAKONCZ_DZIEN_INFO   ||
+      stepsArr[state.step] === ZAKONCZ_DZIEN_GENERIC||
       stepsArr[state.step] === ZAKONCZ_DZIEN_FINAL
     )
-  ){
+  ) {
     disableNext = false;
   }
 
-ui.prevBottom.disabled = disablePrev;
-ui.nextBottom.disabled = disableNext;
+  ui.prevBottom.disabled = disablePrev;
+  ui.nextBottom.disabled = disableNext;
 
-// 🆕 NA 1. KROKU zamieniamy „Wstecz” -> „Opis”
-if (!state.preview && state.name && !state.intro && state.step === 0) {
-  ui.prevBottom.disabled = false;     // odblokuj przycisk
-  ui.prevBottom.textContent = '⬅ Opis';  // zmiana etykiety
-} else {
-  ui.prevBottom.textContent = '⬅ Wstecz'; // w pozostałych przypadkach normalnie
-}
+  // 1. krok: zamiana „Wstecz” -> „Opis”
+  if (!state.preview && state.name && !state.intro && state.step === 0) {
+    ui.prevBottom.disabled   = false;
+    ui.prevBottom.textContent = '⬅ Opis';
+  } else {
+    ui.prevBottom.textContent = '⬅ Wstecz';
+  }
 
-
-  // Pasek informacyjny o podglądzie
+  // pasek „tryb podglądu”
   const previewBar = document.getElementById('previewInfo');
   if (previewBar) previewBar.style.display = state.preview ? 'block' : 'none';
 }
+
 
 // Reset wewnętrzny (bez przeładowania strony)
 function resetAll() {
@@ -1127,30 +1130,64 @@ function nextStep(){
 }
 
 function prevStep() {
-  // 🆕 Na 1. kroku „Wstecz” otwiera opis
+  // 1) Na 1. kroku „Wstecz” otwiera opis
   if (state.name && !state.preview && !state.intro && state.step === 0) {
     state.intro = true;
     render();
     return;
   }
 
-  // 🆕 Jeśli jesteśmy w opisie – „Wstecz” wraca do kroku 1
+  // 2) W opisie „Wstecz” wraca do kroku 1
   if (state.intro) {
     state.intro = false;
-    state.step = 0; // upewniamy się, że wracamy na pierwszy krok
+    state.step = 0;
     render();
     return;
   }
 
-  // ✨ Twój dotychczasowy kod prevStep (normalne cofanie)
-  if (state.step > 0) {
-    state.step--;
-  } else {
-    // ewentualne cofanie między dniami, jeśli masz taką logikę
+  // 3) Różaniec – cofanie wewnętrzne
+  if (state.rosary) {
+    const R = state.rosary;
+    if (R.phase === 'closing') { R.phase = 'bernard'; render(); return; }
+    if (R.phase === 'bernard') { R.phase = 'litania';  render(); return; }
+    if (R.phase === 'litania') { R.phase = 'last2'; R.index = 1; render(); return; }
+    if (R.phase === 'last2')   {
+      if (R.index > 0) { R.index--; render(); return; }
+      R.phase = 'dailyPrayer'; render(); return;
+    }
+    if (R.phase === 'dailyPrayer') { R.phase = 'first3'; R.index = 2; render(); return; }
+    if (R.phase === 'first3')  {
+      if (R.index > 0) { R.index--; render(); return; }
+      // wyjście z różańca do kroku z linkami
+      state.rosary = null;
+      render();
+      return;
+    }
   }
 
+  // 4) Zwykłe cofanie
+  if (!state.name && !state.preview) return;
+
+  const linkIdx = rosaryLinkIndex();
+  // jeśli wychodziliśmy z różańca „w przód”, a teraz cofamy – pokaż końcówkę różańca
+  if (linkIdx !== -1 && state.step === linkIdx + 1 && state.lastRosaryType) {
+    state.rosary = { type: state.lastRosaryType, phase: 'closing', index: 0 };
+    render();
+    return;
+  }
+
+  if (state.step > 0) {
+    state.step -= 1;
+    state.fromRosaryExit = false;
+    save();
+    render();
+    return;
+  }
+
+  // (opcjonalnie) cofanie między dniami – zostawiasz puste, jak dotąd
   render();
 }
+
 
     if(R.phase==='dailyPrayer'){ R.phase='first3'; R.index=2; render(); return; }
     if(R.phase==='last2'){
