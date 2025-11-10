@@ -179,9 +179,10 @@
       <div class="ctrl-bottom">
         <button id="prevBottom" class="nav-btn secondary" disabled>⟵ Wstecz</button>
         <button id="nextBottom" class="nav-btn" disabled>Dalej ⟶</button>
-      </div>
+      
+      <div id="footerDots" class="footer" aria-label="Postęp nowenny (dni)"></div>
 
-<footer>
+$1
   Postęp nowenny — dzień po dniu. ✝️ © 2025 
   <a href="https://drogawiary.github.io/" style="color:inherit;text-decoration:none;font-weight:600;">
     drogawiary@wp.pl
@@ -965,21 +966,25 @@ function render(){
   }
 
   // Dots
-  ui.dotsWrap.innerHTML = '';
-  for (let i = 1; i <= 9; i++) {
-    const dot = document.createElement('div');
-    dot.className = 'dot';
-    if (state.name || state.preview) {
-      const isDone =
-        !!(state.done[i - 1]) ||
-        i < state.day ||
-        (i === state.day && (state.step > 0 || !!state.rosary || state.intro));
-      if (isDone) dot.classList.add('done');
-      if (i === state.day) dot.classList.add('current');
+  if (!ui.dotsWrap) {
+    console.warn('Brak kontenera #footerDots — pomijam render kropek.');
+  } else {
+    ui.dotsWrap.innerHTML = '';
+    for (let i = 1; i <= 9; i++) {
+      const dot = document.createElement('div');
+      dot.className = 'dot';
+      if (state.name || state.preview) {
+        const isDone =
+          !!(state.done[i - 1]) ||
+          i < state.day ||
+          (i === state.day && (state.step > 0 || !!state.rosary || state.intro));
+        if (isDone) dot.classList.add('done');
+        if (i === state.day) dot.classList.add('current');
+      }
+      const dt = state.name ? dateForDay(i) : null;
+      dot.title = state.name && dt ? `Dzień ${i} — ${formatPL(dt)}` : `Dzień ${i}`;
+      ui.dotsWrap.appendChild(dot);
     }
-    const dt = state.name ? dateForDay(i) : null;
-    dot.title = state.name && dt ? `Dzień ${i} — ${formatPL(dt)}` : `Dzień ${i}`;
-    ui.dotsWrap.appendChild(dot);
   }
 
   // Nawigacja
