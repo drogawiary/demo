@@ -1,1447 +1,777 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pl">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Nowenna rozwiązująca węzły — interaktywnie (9 dni)</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
-  
-<style>
-  :root{
-    --bg: #f3f6ff;
-    --panel: #ffffff;
-    --panel-2:#eef2ff;
-    --text:#0e1533;
-    --muted:#6370a0;
-    --accent:#2450ff;
-    --accent-2:#6ea8ff;
-    --ring:#2450ff22;
-    --ok:#2563eb;
-    --ok-strong:#1d4ed8;
-    --soft:#e8edff;
-    --chip:#dbe5ff;
-  }
-  .dark{
-    --bg:#0f1221;
-    --panel:#161a2f;
-    --panel-2:#1a1f3a;
-    --text:#e8edff;
-    --muted:#a7b1e6;
-    --accent:#8ea0ff;
-    --accent-2:#6ea8ff;
-    --ring:#8ea0ff33;
-    --ok:#8ea0ff;
-    --ok-strong:#b2c2ff;
-    --soft:#20254a;
-    --chip:#272f63;
-  }
-/* 🌙 Jasny maryjny kolor i delikatna poświata dla dni tygodnia (tryb nocny) */
-.dark .content a[data-rosary] {
-  color: #b9d5ff;              /* pastelowy maryjny błękit */
-  font-weight: 600;
-  text-shadow: 0 0 6px #4f7fff; /* subtelny efekt poświaty */
-  transition: all 0.3s ease;
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Droga wiary</title>
+  <meta name="description" content="Droga Wiary — strona dla katolików."/>
+  <style>
+    * { box-sizing: border-box; -webkit-text-size-adjust: 100%; }
+    html, body { margin: 0; padding: 0; }
+
+    :root{
+      --bg:#1b2a49; --panel:#22355c; --panel-2:#1d2e50;
+      --ink:#e7ecf6; --muted:#aab3c6; --border:#2e4a7f;
+      --accent:#4a8cff; --accent-2:#7aa8ff; --shadow:0 10px 25px rgba(0,0,0,.25);
+    }
+
+    body {
+      font-family: system-ui, Segoe UI, Roboto, Ubuntu, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      display: flex;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .wrap {
+      background: linear-gradient(180deg, var(--panel), var(--panel-2));
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+      max-width: 900px;
+      width: 100%;
+      padding: 16px;
+    }
+
+    header.book {
+      background: linear-gradient(145deg,#0b3d91,#1565c0,#1e88e5);
+      color: #fff;
+      text-align: center;
+      padding: 32px 20px;
+      border-radius: 14px;
+      margin-bottom: 20px;
+      font-size: clamp(32px, 5vw, 52px);
+      font-family: 'Playfair Display', serif;
+      text-shadow: 0 0 8px #fff, 0 0 16px #a8c8ff;
+      box-shadow: inset 0 0 10px #ffffff22;
+    }
+
+    .buttons-frame {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(80px, 1fr));
+      gap: 8px;
+      justify-items: center;
+      align-items: center;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    .nav-btn {
+      padding: 6px 10px;
+      border: 1px solid var(--accent);
+      color: #fff;
+      background: transparent;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all .3s ease;
+      min-width: unset;
+      width: auto;
+      box-sizing: border-box;
+    }
+
+    .nav-btn.active, .nav-btn:hover {
+      background: var(--accent);
+      transform: translateY(-2px);
+      box-shadow: 0 3px 10px rgba(74,140,255,.4);
+    }
+
+    @media (max-width: 700px){
+      .buttons-frame {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .nav-btn {
+        width: 90%;
+      }
+
+      .intro-box,
+      #reader {
+        padding: 6px 10px !important;
+        margin-left: -4px !important;
+        margin-right: -4px !important;
+      }
+    }
+
+    .intro-box {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 6px 10px;
+      margin-top: 24px;
+      line-height: 1.6;
+    }
+
+    .intro-box h2 {
+      margin-top: 0;
+      font-size: 1.4rem;
+      color: var(--ink);
+    }
+
+    .tiles {
+      display: none;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 16px;
+      margin-top: 24px;
+      animation: fade .25s ease-out;
+    }
+
+    @keyframes fade {
+      from { opacity: 0; transform: translateY(6px);}
+      to   { opacity: 1; transform: none;}
+    }
+
+    .card {
+      background: #f5ecd9;
+      color: #2a1f0e;
+      border-radius: 14px;
+      box-shadow: 0 4px 15px rgba(0,0,0,.2);
+      padding: 20px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .card img {
+      width: 80px;
+      height: auto;
+      margin: 0 auto 10px;
+      border-radius: 10px;
+    }
+
+    .card h3 { margin: 10px 0; font-size: 1.2rem; }
+    .card p  { font-size: 0.9rem; color: #333; flex-grow: 1; }
+
+    .tags { margin: 10px 0; }
+    .tag {
+      background: var(--accent);
+      color: #fff;
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 0.8rem;
+      margin-right: 6px;
+    }
+
+    .go {
+      display: inline-block;
+      margin-top: 10px;
+      background: var(--accent);
+      color: #fff;
+      padding: 8px 14px;
+      border-radius: 8px;
+      text-decoration: none;
+      transition: background .3s;
+    }
+
+    .go:hover { background: var(--accent-2); }
+
+    #reader article p { margin: 0 0 10px; }
+    #reader article h2, #reader article h3 { margin: 12px 0 8px; }
+
+    footer {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      text-align: center;
+      color: var(--ink);
+      padding: 20px;
+      margin-top: 40px;
+      font-size: 0.95rem;
+    }
+
+    footer a {
+      color: var(--ink);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    footer a:hover { color: var(--accent-2); }
+
+    @media (max-width: 700px){
+      body{ padding: 8px; }
+      .wrap{ padding: 8px; }
+
+      .intro-box,
+      #reader {
+        margin-left: -2px;
+        margin-right: -2px;
+        border-radius: 12px;
+        padding: 22px 16px;
+      }
+
+      #reader article{
+        font-size: 1.02rem;
+        line-height: 1.75;
+      }
+    }
+
+    .links-frame{
+      margin-top: 32px;
+      margin-bottom: 24px;
+      grid-template-columns: repeat(3, minmax(80px, 1fr));
+    }
+
+    .tiles-links{
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 24px;
+    }
+
+    .link-btn{
+      display: block;
+      width: 100%;
+      text-align: left;
+      padding: 12px 18px;
+      border-radius: 12px;
+      border: 1px solid var(--accent);
+      background: rgba(12, 30, 60, 0.9);
+      color: #fff;
+      font-weight: 600;
+      font-size: 0.98rem;
+      text-decoration: none;
+      box-shadow: 0 4px 14px rgba(0,0,0,.35);
+      transition: all .25s ease;
+    }
+
+    .link-btn:hover{
+      background: var(--accent);
+      box-shadow: 0 4px 14px rgba(74,140,255,.6);
+      transform: translateY(-2px);
+    }
+    /* Audio w przycisku link-btn (Radio Niepokalanów) */
+.link-btn audio{
+  display:block;
+  margin-top:8px;
+  width:100%;
+  max-width:420px;
 }
 
-.dark .content a[data-rosary]:hover {
-  color: #e3eeff;              /* jaśniejszy przy najechaniu */
-  text-shadow: 0 0 10px #a5c9ff, 0 0 20px #7fb3ff; /* efekt aurory */
-  text-decoration: underline;
-}
-
-/* 💫 Poświata dla paska informacyjnego "tryb podglądu" */
-.dark .previewInfo {
-  background: #101940;
-  box-shadow: 0 0 14px #2e4aff80; /* delikatny błękitny glow */
-  border: 1px solid #3a55ff40;
-  color: #ffffff;
-  text-shadow: 0 0 8px #7fa7ff, 0 0 16px #4f7fff;
-}
-
-.previewInfo {
-  background: #e8f0ff;
-  box-shadow: 0 0 12px #bcd2ff;
-  border: 1px solid #d0e0ff;
-  color: #0e1533;
-  font-weight: 700;
-}
-
-/* 💎 Poświata i pogrubienie dla tytułów tajemnic różańca w trybie nocnym */
-.dark .content h4,
-.dark .content strong {
-  color: #dbe4ff;
-  font-weight: 700;
-  text-shadow: 0 0 8px #7fa7ff, 0 0 16px #4f7fff; /* maryjna poświata */
-}
-
-/* W dzień – tylko mocniejszy kontrast, bez świecenia */
-.content h4,
-.content strong {
-  color: #0e1533;
-  font-weight: 700;
-}
-
- /* ✝️ Styl dopisku o węźle w nowennie */
-.dark .wezel-info {
-  color: #cdd9ff;
-  text-shadow: 0 0 8px #7fa7ff, 0 0 16px #4f7fff; /* delikatny blask */
-}
-
-.wezel-info {
-  color: #24336b;
-  font-style: italic;
-  margin-top: 6px;
-}
-
-
-   
-  *{box-sizing:border-box}
-  html,body{height:100%}
-  body{margin:0; background:var(--bg); color:var(--text); font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial;}
-.wrap{max-width:800px; margin:0 auto; padding:18px;}
-  header{display:block; margin-bottom:14px}
-.banner {
-  background: linear-gradient(145deg, #0b3d91, #1565c0, #1e88e5);
-  color: #fff;
-  border-radius: 18px;
-  padding: 18px;
-  text-align: center;
-  box-shadow: 0 8px 24px #0002;
-  border: 1px solid #ffffff22;
-  margin-bottom: 12px;
-}
-
-.banner h1 {
-  margin: 0;
-  font-size: clamp(22px, 4.5vw, 32px); /* rozmiar zostaje ten sam */
-  font-weight: 800;
-  letter-spacing: .2px;
-  font-family: 'Playfair Display', serif;
-  text-shadow: 0 0 8px #fff, 0 0 16px #a8c8ff;
-  color: #fff;
-}
-
-  .menu{position:absolute; top:100%; margin-top:8px; background:var(--panel); border:1px solid #00000015; box-shadow:0 14px 40px #0003; border-radius:14px; padding:8px; min-width:220px; max-width:280px; z-index:50; display:none}
-  .menu.show{display:block}
-  .menu h4{margin:6px 8px 8px; font-size:12px; color:var(--muted); font-weight:700; letter-spacing:.2px}
-  .menu .item{display:flex; align-items:center; justify-content:space-between; gap:8px; padding:8px 10px; border-radius:10px; cursor:pointer}
-  .menu .item:hover{background:var(--soft)}
-  .menu .item .meta{font-size:11px; color:var(--muted)}
-  .menu .del{border:none; background:#f1f3ff; color:#1a2a7a; border-radius:8px; padding:6px 8px; cursor:pointer}
-  .menu .empty{padding:10px; font-size:12px; color:var(--muted)}
-  .controls{display:flex; gap:8px; align-items:center;}
-  .field{display:flex; gap:8px; align-items:center; background:var(--panel); border:1px solid #00000010; padding:6px 8px; border-radius:12px}
-  .field input{border:none; outline:none; background:transparent; color:var(--text); font-size:14px; padding:6px; width:130px}
-  .btn{border:none; border-radius:12px; padding:10px 14px; cursor:pointer; font-weight:700; letter-spacing:.2px}
-  .toggle{background:var(--panel); border:1px solid #00000010; box-shadow:0 4px 14px #0002;}
-  .square{width:40px; height:40px; padding:0; display:grid; place-items:center; background:#e7ebff; color:#1a2a7a}
-  .square.active{background:#1a2a7a; color:#e7ebff}
-  .start{background:linear-gradient(180deg, #35b86b, #2ea45f); color:white}
-  .card{background:linear-gradient(180deg, var(--panel), var(--panel-2)); border:1px solid #ffffff12; border-radius:18px; padding:18px; box-shadow:0 10px 30px #0003}
-  .content{min-height:120px; padding:14px; border-radius:14px; background:var(--soft); border:1px solid #ffffff22; line-height:1.6}
-  .content h3{margin:0 0 10px; font-size:21px}
-  .meta{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:10px; font-size:13px; color:var(--muted)}
-  .ctrl-bottom{display:flex; align-items:center; justify-content:center; gap:10px; margin-top:10px; flex-wrap:wrap}
-  .nav-btn{border:none; border-radius:999px; padding:12px 20px; background:#2450ff; color:white; font-weight:800; letter-spacing:.3px; cursor:pointer}
-  .nav-btn:disabled{opacity:.5; cursor:not-allowed}
-  .nav-btn.secondary{background:#d7dcef; color:#1c275f}
-  .footer{margin-top:12px; display:flex; align-items:center; justify-content:center; gap:8px; white-space:nowrap; overflow-x:auto; padding:6px 4px}
-  .dot{display:inline-block; width:18px; height:18px; border-radius:4px; background:#c9d3ff; border:1px solid #9bb1ff; opacity:.9}
-  .dot.done{background:var(--ok); border-color:var(--ok-strong); opacity:1}
-  .dot.current{background:var(--ok); border-color:var(--ok-strong); opacity:1}
-  .toast{position:fixed; inset:auto 0 22px 0; display:flex; justify-content:center; pointer-events:none}
-  .toast > div{background:#101940; color:white; padding:10px 16px; border-radius:12px; box-shadow:0 10px 30px #0007; opacity:0; transform:translateY(8px)}
-  .toast.show > div{opacity:1; transform:translateY(0); transition:all .25s ease}
-  .hint{font-size:12px; color:var(--muted); text-align:center; margin-top:6px}
-
-.footer-bar {
-  display: flex;
-  flex-direction: column;      /* tekst pod sobą */
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 14px 8px;
-  margin-top: 20px;
-  border-top: 1px solid #0001;
-  opacity: .9;
-  font-size: 15px;
-  line-height: 1.6;
-}
-
-.dark .footer-bar {
-  border-top-color: #ffffff22;
-}
-
-.footer-bar a {
-  color: inherit;
-  text-decoration: none;
-  font-weight: 600;
-}
-
-.footer-bar button#peekBtn {
-  margin-top: 10px;
-  width: 36px;
-  height: 36px;
-  font-weight: 700;
-  background: #dbe5ff;
-  color: #000033;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: 0.2s ease;
-}
-
-.footer-bar button#peekBtn:hover {
-  background: #c5d5ff;
-}
-
-
-.field input {
-  text-align: center;
-}
-
-/* 📌 Cały pasek (ikonka + imię + Start) wyśrodkowany */
-.controlbar {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-  position: relative;
-  margin: 10px auto;
-}
-
-/* 📌 Menu profili otwiera się dokładnie pod ikonką 👤 */
-.controlbar .menu {
-  position: absolute;
-  top: calc(100% + 8px);
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 9999;
-  max-width: 280px;
-}
-
-
-
-</style>
+  </style>
 </head>
 <body>
-
   <div class="wrap">
-    <header>
-      <div class="banner"><h1>Nowenna rozwiązująca węzły</h1></div>
-      <div class="controlbar">
-        <button id="themeBtn" class="btn toggle" title="Tryb dzień / noc">🌞/🌙</button>
-        <div class="field">
-          <button id="nameBtn" class="btn square" title="Wybierz zapisane imię">👤</button>
-          <input id="nameInput" type="text" placeholder="np. Ania" maxlength="24" />
-          <button id="startBtn" class="btn start">Start</button>
-        </div>
-        <div id="nameMenu" class="menu" aria-hidden="true"></div>
-      </div>
-    </header>
+    <header class="book" id="homeLink" style="cursor:pointer;">Droga wiary</header>
 
-    <!-- Pasek informujący o trybie podglądu -->
-    <div id="previewInfo" class="previewInfo" role="status" aria-live="polite">
-      Jesteś w trybie podglądu całej nowenny
+    <div class="buttons-frame">
+      <button class="nav-btn" id="btn-wiara" aria-pressed="false">Moja wiara</button>
+      <button class="nav-btn" id="btn-arty" aria-pressed="false">Artykuły</button>
+      <button class="nav-btn" id="btn-modlitwy" aria-pressed="false">Modlitwy</button>
+      <button class="nav-btn" id="btn-ksiazki" aria-pressed="false">Książki</button>
     </div>
 
-    <div class="card">
-      <div id="content" class="content">Podaj imię i kliknij „Start”, aby zacząć dzień 1. Albo kliknij w ikonkę postaci, by wybrać wcześniej zapisanych użytkowników.</div>
-      <div class="meta">
-        <div id="metaDay">Dzień –</div>
-        <div id="metaStep">Krok –/–</div>
+    <div class="intro-box" id="intro">
+      <p><strong>Niech będzie pochwalony Jezus Chrystus.</strong></p>
+
+      <p>
+        Drogę wiary, którą wybrałem, jest wiara w Boga Ojca w Trójcy Jedynego
+        i w Jezusa Chrystusa, Jego Syna. Całe piękno, które odkrywam w stworzeniu świata,
+        prowadzi mnie do wdzięczności Bogu za to, że obdarzył mnie życiem i troską.
+        A przecież <strong>tak rzadko dziękujemy Mu za to, co robi dla nas każdego dnia</strong> —
+        za zdrowie, bliskich, Opatrzność, i za to, że prowadzi nas nawet wtedy, gdy tego nie widzimy.
+      </p>
+
+      <p>
+        Chciałbym podzielić się tutaj z każdym, kto pragnie pogłębić swoją wiarę
+        albo poświęcić chwilę, aby znaleźć odpowiedzi na różne trudne pytania —
+        zwłaszcza te, na które sam przez wiele lat nie mogłem znaleźć wyjaśnienia.
+      </p>
+
+      <p>
+        Każdy człowiek ma wolną wolę. Każdy z nas niesie w sobie setki pytań zaczynających się od „dlaczego?”.
+        Dlaczego jedni wierzą bardzo mocno, inni nie wierzą w nic,
+        a jeszcze inni wierzą w Boga, ale nie wierzą w Kościół ani w kapłanów?
+        Dlaczego ktoś mówi, że wystarczy „wierzyć po swojemu”,
+        a ktoś inny uważa, że sam najlepiej wie, kim jest Bóg?
+      </p>
+
+      <p>
+        To naturalne. Człowiek szuka odpowiedzi — tak jak dziecko, które nieustannie pyta swoich rodziców,
+        bo chce zrozumieć świat. I my, dorośli, również chcielibyśmy, aby ktoś tłumaczył nam wiarę prosto i prawdziwie.
+      </p>
+
+      <p>
+        A prawda jest taka, że <strong>Bóg naprawdę dał nam wszystkie odpowiedzi</strong>.
+        Są one w Piśmie Świętym. Potwierdzone znakami. Potwierdzone cudami.
+        Potwierdzone objawieniami. Musimy tylko nauczyć się je zauważać, rozumieć i czytać —
+        tak jak dziecko, które uczy się wszystkiego od początku.
+      </p>
+
+      <p>
+        Często religia przekazywana jest nam w sposób schematyczny, bez głębszego wyjaśnienia.
+        Z czasem zrozumiałem, że bez modlitwy nie da się naprawdę poznać Boga.
+        Możemy słuchać, pytać, drążyć tematy, ale dopiero na modlitwie szczerej i płynącej z serca
+        Bóg zaczyna otwierać nasze oczy.
+      </p>
+
+      <p>
+        Tak działa łaska Boża. Tak działa mądrość, którą daje Duch Święty.
+        Tak prowadzi nas Maryja — nie zatrzymując przy sobie, ale prowadząc do Jezusa.
+      </p>
+
+      <p>
+        Dlatego „Droga Wiary” powstała z jednym pragnieniem:
+        <strong>aby w prostych słowach rozjaśnić to, czego sam przez lata nie rozumiałem.</strong>
+        Aby każdy, kto szuka Boga, wiedział, że nie jest sam.
+        Aby mógł znaleźć tutaj modlitwy, rozważania, artykuły i wyjaśnienia,
+        które pomogą mu iść dalej — ale przede wszystkim <em>rozumieć</em> to, w co wierzy.
+        Tak jak ja to zrozumiałem, za co jestem Bogu bardzo wdzięczny.
+      </p>
+
+      <p>
+        Ta strona nie powstała dla chwały. Nie dla lajków. Nie dla uznania.
+        Nie ma tu mojego nazwiska, bo <strong>wszystko ma wskazywać na Boga, nie na człowieka</strong>.
+      </p>
+
+      <p>
+        Staram się tutaj odsłonić prawdy, które bolą, czasem zawstydzają, czasem poruszają do głębi.
+        Nie osądzam nikogo poza sobą. Pokazuję, że nawet z bardzo głębokiego grzechu
+        człowiek może się podnieść i zacząć żyć po katolicku. Że nigdy nie jest za późno.
+      </p>
+
+      <p>
+        To szatan podsuwa myśli: „Zrób to później.” „Nic się nie stało.”
+        „Jesteś zbyt grzeszny, Bóg już cię nie chce.” „Nie wracaj, żyj po cichu w grzechu.”
+        To wszystko są kłamstwa. Bóg nigdy o nas nie zapomina. Zawsze czeka, zawsze przebacza, zawsze podnosi.
+      </p>
+
+      <p>
+        Dlatego chciałem, aby „Droga Wiary” była miejscem, gdzie każdy —
+        nieważne skąd idzie ani jak daleko zaszedł —
+        może znaleźć światło, modlitwę, odpowiedź lub choćby małą iskrę nadziei.
+      </p>
+
+      <p><strong>Bądźmy mocni wiarą. Amen.</strong></p>
+    </div>
+
+    <!-- Kafelki: Moja wiara -->
+    <div class="tiles" id="tiles-wiara">
+      <div class="card">
+        <h3>Być katolikiem</h3>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Rosary2.jpg/240px-Rosary2.jpg" alt="Dom">
+        <p>Jak stworzyć w swoim domu przestrzeń spotkania z Bogiem i pokoju serca.</p>
+        <div class="tags"><span class="tag">modlitwa</span><span class="tag">duchowość</span></div>
+        <a class="go" href="#wiara/dom-modlitwy">Przejdź</a>
       </div>
+      <div class="card">
+        <h3>Świadectwa wiary</h3>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Rosary2.jpg/240px-Rosary2.jpg" alt="Pióro">
+        <p>Prawdziwe historie ludzi, którzy odnaleźli Boga pośród trudności i wątpliwości.</p>
+        <div class="tags"><span class="tag">świadectwa</span><span class="tag">życie</span></div>
+        <a class="go" href="#wiara/swiadectwa-wiary">Przejdź</a>
+      </div>
+      <div class="card">
+        <h3>Maryja prowadzi</h3>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Rosary2.jpg/240px-Rosary2.jpg" alt="Różaniec">
+        <p>Rozważania o obecności Maryi w naszym codziennym życiu i sile Jej wstawiennictwa.</p>
+        <div class="tags"><span class="tag">maryja</span><span class="tag">różaniec</span></div>
+        <a class="go" href="#wiara/maryja-prowadzi">Przejdź</a>
+      </div>
+    </div>
 
-      <div class="ctrl-bottom">
-        <button id="prevBottom" class="nav-btn secondary" disabled>⟵ Wstecz</button>
-        <button id="nextBottom" class="nav-btn" disabled>Dalej ⟶</button>
-      
-<div id="footerDots" class="footer" aria-label="Postęp nowenny (dni)"></div>
+    <!-- Kafelki: Artykuły -->
+    <div class="tiles" id="tiles-arty">
+      <div class="card">
+        <h3>Światło wiary</h3>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Rosary2.jpg/240px-Rosary2.jpg" alt="Wiara">
+        <p>Artykuły o nadziei, miłości i wytrwałości w codziennym życiu chrześcijanina.</p>
+        <div class="tags"><span class="tag">wiara</span><span class="tag">życie</span></div>
+        <a class="go" href="#arty/swiatlo-wiary">Czytaj</a>
+      </div>
+      <div class="card">
+        <h3>Pokój serca</h3>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Rosary2.jpg/240px-Rosary2.jpg" alt="Pokój">
+        <p>Jak odnaleźć spokój duszy i wewnętrzną harmonię dzięki modlitwie i ciszy.</p>
+        <div class="tags"><span class="tag">modlitwa</span><span class="tag">duchowość</span></div>
+        <a class="go" href="#arty/pokoj-serca">Czytaj</a>
+      </div>
+      <div class="card">
+        <h3>Duchowe drogowskazy</h3>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Rosary2.jpg/240px-Rosary2.jpg" alt="Drogowskazy">
+        <p>Rozważania o tym, jak Bóg prowadzi człowieka przez trudne etapy życia.</p>
+        <div class="tags"><span class="tag">rozważania</span><span class="tag">wiara</span></div>
+        <a class="go" href="#arty/duchowe-drogowskazy">Czytaj</a>
+      </div>
+    </div>
 
-<footer class="footer-bar">
-  <span>„Nowenna — dzień po dniu” ✝️ © 2025</span>
-  <a href="https://drogawiary.github.io/" rel="noopener"
-     style="color:inherit;text-decoration:none;font-weight:600;">
-    Strona --> drogawiary@wp.pl
+    <!-- Kafelki: Modlitwy -->
+    <div class="tiles" id="tiles-modlitwy">
+      <div class="card">
+        <h3>Różaniec</h3>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Rosary2.jpg/240px-Rosary2.jpg" alt="Różaniec">
+        <p>Modlitwa, która prowadzi do serca Maryi i uczy nas kontemplacji życia Jezusa.</p>
+        <div class="tags"><span class="tag">maryja</span><span class="tag">modlitwa</span></div>
+        <a class="go" href="https://drogawiary.github.io/RC/">Przejdź</a>
+      </div>
+      <div class="card">
+        <h3>Nowenna</h3>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Rosary2.jpg/240px-Rosary2.jpg" alt="Nowenna">
+        <p>Dziewięciodniowa modlitwa błagalna, przez którą powierzamy Bogu nasze intencje.</p>
+        <div class="tags"><span class="tag">modlitwa</span><span class="tag">łaska</span></div>
+        <a class="go" href="https://drogawiary.github.io/Nowenna_RW/">Przejdź</a>
+      </div>
+      <div class="card">
+        <h3>Droga Krzyżowa</h3>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Rosary2.jpg/240px-Rosary2.jpg" alt="Krzyż">
+        <p>Rozważania męki Pańskiej, które pomagają nam w zjednoczeniu z cierpiącym Chrystusem.</p>
+        <div class="tags"><span class="tag">krzyż</span><span class="tag">pasja</span></div>
+        <a class="go" href="#">Przejdź</a>
+      </div>
+    </div>
+
+    <!-- Kafelki: Książki -->
+    <div class="tiles" id="tiles-ksiazki">
+      <div class="card">
+        <h3>Znaki Maryi</h3>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Rosary2.jpg/240px-Rosary2.jpg" alt="Maryja">
+        <p>Duchowe kompendium objawień maryjnych — od Fatimy po Gietrzwałd.</p>
+        <div class="tags"><span class="tag">maryja</span><span class="tag">objawienia</span></div>
+        <a class="go" href="https://drogawiary.github.io/Znaki-Maryi/">Czytaj</a>
+      </div>
+      <div class="card">
+        <h3>Świadectwo Alberta</h3>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Rosary2.jpg/240px-Rosary2.jpg" alt="Albert">
+        <p>Poruszająca historia człowieka, który przeszedł od ciemności do światła.</p>
+        <div class="tags"><span class="tag">wiara</span><span class="tag">świadectwo</span></div>
+        <a class="go" href="https://drogawiary.github.io/SwiadectwoAlberta/">Czytaj</a>
+      </div>
+      <div class="card">
+        <h3>Droga Wiary</h3>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Rosary2.jpg/240px-Rosary2.jpg" alt="Droga Wiary">
+        <p>Główne kompendium duchowe — projekt łączący wszystkie rozważania w jedną całość.</p>
+        <div class="tags"><span class="tag">książka</span><span class="tag">kompendium</span></div>
+        <a class="go" href="#">Czytaj</a>
+      </div>
+    </div>
+
+<!-- LINKI: sama lista linków -->
+<div class="tiles-links" id="tiles-linki">
+
+  <a class="link-btn" href="https://www.biblia.pl/">
+    Biblia online
   </a>
-  <button id="peekBtn" class="btn square" title="Podgląd wszystkich dni (X)">(i)</button>
-</footer>
 
+  <a class="link-btn" href="https://www.vaticannews.va/pl.html">
+    Vatican News
+  </a>
 
+  <a class="link-btn" href="https://www.youtube.com/watch?v=EEM7a3mHMR4">
+    Vatican online – transmisja na żywo (YouTube)
+  </a>
 
+  <a class="link-btn" href="https://www.youtube.com/watch?v=yMxD3gdeXmk">
+    Oficjalny kanał Jasnej Góry (YouTube)
+  </a>
+
+  <a class="link-btn" href="https://www.youtube.com/@sw.faustyna">
+    Sanktuarium w Łagiewnikach – św. Faustyna (YouTube)
+  </a>
+
+  <a class="link-btn" href="https://www.youtube.com/@PiotrKleszcz2/videos">
+    „zielone pastwisko” – o. Piotr Kleszcz
+  </a>
+
+  <a class="link-btn" href="https://www.youtube.com/watch?v=ESNa1vdHcYY">
+    Lourdes online – transmisja z sanktuarium (YouTube)
+  </a>
+
+  <a class="link-btn" href="https://www.gaudemaria.org/category/badania/mariologia/">
+    Gaude Maria – mariologia
+  </a>
+
+  <a class="link-btn" href="https://pompejanska.krolowa.pl/">
+    Pompejańska Królowa Różańca Świętego
+  </a>
+
+</div>
+<!-- RADIO: osobna sekcja -->
+<div class="tiles-links" id="tiles-radio" style="display:none">
+
+  <div class="link-btn">
+    📻 Radio Niepokalanów – słuchaj na żywo
+    <audio controls>
+      <source src="https://n19a-eu.rcs.revma.com/gg1s5wrph72vv.m4a?rj-ttl=5&rj-tok=AAABmpCzeVAApqTINcc_dJ28lw&1763363649="
+              type="audio/mp4">
+      Twoja przeglądarka nie obsługuje odtwarzacza audio.
+    </audio>
   </div>
 
-  <div class="toast" id="toast"><div id="toastMsg">—</div></div>
+  <div class="link-btn">
+    📻 Radio Jasna Góra – słuchaj na żywo
+    <audio controls>
+      <source src="https://online.radiojasnagora.pl:9000/rjg" type="audio/mpeg">
+      Twoja przeglądarka nie obsługuje odtwarzacza audio.
+    </audio>
+  </div>
+
+</div>
+
+
+    <!-- Kafelki: Apki -->
+    <div class="tiles" id="tiles-apki">
+      <div class="card">
+        <h3>Różaniec Interaktywny</h3>
+        <p>Piękna aplikacja do różańca z trybem nocnym i zapisem postępu.</p>
+        <a class="go" href="https://drogawiary.github.io/RC/" target="_blank">Uruchom</a>
+      </div>
+
+      <div class="card">
+        <h3>Nowenna RW</h3>
+        <p>Najbardziej dopracowana wersja Twojej nowenny — mobilna i szybka.</p>
+        <a class="go" href="https://drogawiary.github.io/Nowenna_RW/" target="_blank">Uruchom</a>
+      </div>
+
+      <div class="card">
+        <h3>Kalendarz Katolicki</h3>
+        <p>Kalendarz liturgiczny z czytaniami, świętymi i „Myślą Dnia”.</p>
+        <a class="go" href="https://drogawiary.github.io/Kalendarz" target="_blank">Uruchom</a>
+      </div>
+    </div>
+
+    <!-- Czytnik artykułów -->
+    <section id="reader" class="intro-box" style="display:none">
+      <h2 id="reader-title">Tytuł</h2>
+      <article id="reader-body">Ładowanie…</article>
+      <div style="margin-top:16px">
+        <button id="backBtn" class="nav-btn" type="button">⟵ Powrót</button>
+      </div>
+    </section>
+
+    <!-- Dolna rameczka: Linki / Apki (bez „Radio”) -->
+<div class="buttons-frame links-frame">
+  <button class="nav-btn" type="button" id="btn-linki">Linki</button>
+  <button class="nav-btn" type="button" id="btn-radio">Radio</button>
+  <button class="nav-btn" type="button" id="btn-apki">Apki</button>
+</div>
+
+
+    <footer>
+      Droga wiary — strona dla katolików. ✝️ © 2025<br>
+      <a href="https://www.youtube.com/@Droga_wiary_z_Maryj%C4%85" target="_blank" rel="noopener noreferrer">
+        🌹 Otwórz kanał Droga Wiary na YouTube
+      </a>
+    </footer>
+  </div>
 
 <script>
-'use strict';
+  const intro = document.getElementById('intro');
+  const btnWiara = document.getElementById('btn-wiara');
+  const btnArty = document.getElementById('btn-arty');
+  const btnModlitwy = document.getElementById('btn-modlitwy');
+  const btnKsiazki = document.getElementById('btn-ksiazki');
 
-// 🔒 Tryb testów (blokuje zapisy do localStorage w czasie selfTests)
-let TESTING = false;
+  const btnLinki = document.getElementById('btn-linki');
+  const btnRadio = document.getElementById('btn-radio');
+  const btnApki  = document.getElementById('btn-apki');
 
-/* ============================
-   BLOKI TREŚCI — pełna treść (stabilna)
-   ============================ */
-const SEKWE = `
-<h3>Sekwencja do Ducha Świętego</h3>
-<p>
-Przybądź, Duchu Święty, ześlij z nieba wzięty światła Twego strumień.<br/>
-Przyjdź, Ojcze ubogich, Dawco darów mnogich, przyjdź, Światłości sumień.<br/>
-O najmilszy z gości, słodka serc radości, słodkie orzeźwienie.<br/>
-W pracy Tyś ochłodą, w skwarze żywą wodą, w płaczu utulenie.<br/>
-Światłości najświętsza, serc wierzących wnętrza poddaj Twej potędze.<br/>
-Bez Twojego tchnienia cóż jest wśród stworzenia? Jeno cierń i nędze.<br/>
-Obmyj, co nieświęte, oschłym wlej zachętę, ulecz serca ranę.<br/>
-Nagnij, co jest harde, rozgrzej serca twarde, prowadź zabłąkane.<br/>
-Daj Twoim wierzącym, w Tobie ufającym, siedmiorakie dary.<br/>
-Daj zasługę męstwa, daj wieniec zwycięstwa, daj szczęście bez miary. Amen.
-</p>`;
+  const tilesWiara = document.getElementById('tiles-wiara');
+  const tilesArty = document.getElementById('tiles-arty');
+  const tilesModlitwy = document.getElementById('tiles-modlitwy');
+  const tilesKsiazki = document.getElementById('tiles-ksiazki');
 
-const SKLAD = `
-<h3>Skład Apostolski</h3>
-<p>
-Wierzę w Boga, Ojca wszechmogącego, Stworzyciela nieba i ziemi.<br/>
-I w Jezusa Chrystusa, Syna Jego jedynego, Pana naszego,<br/>
-który się począł z Ducha Świętego, narodził się z Maryi Panny,<br/>
-umęczon pod Ponckim Piłatem, ukrzyżowan, umarł i pogrzebion,<br/>
-zstąpił do piekieł, trzeciego dnia zmartwychwstał,<br/>
-wstąpił na niebiosa, siedzi po prawicy Boga Ojca wszechmogącego,<br/>
-stamtąd przyjdzie sądzić żywych i umarłych.<br/>
-Wierzę w Ducha Świętego, święty Kościół powszechny,<br/>
-świętych obcowanie, grzechów odpuszczenie,<br/>
-ciała zmartwychwstanie, żywot wieczny. Amen.
-</p>`;
+  const tilesLinki = document.getElementById('tiles-linki');
+  const tilesRadio = document.getElementById('tiles-radio');
+  const tilesApki  = document.getElementById('tiles-apki');
 
-const AKT_ZALU = `
-<h3>Akt żalu</h3>
-<p>
-Boże mój, z całego serca żałuję za wszystkie moje grzechy i wyrzekam się ich,<br/>
-ponieważ grzesząc, nie tylko zasłużyłem na kary sprawiedliwie przez Ciebie ustanowione,<br/>
-ale szczególnie dlatego żałuję, że obraziłem Ciebie, najwyższe dobro<br/>
-i jedynie godnego, aby być ponad wszystko kochanym.<br/>
-Dlatego z całą mocą przyrzekam, z pomocą łaski Twojej,<br/>
-już więcej nie grzeszyć i na przyszłość unikać okazji do grzechu. Amen.
-</p>`;
+  const buttons = document.querySelectorAll('.nav-btn');
 
-const MODL_MARYJA = `
-<h3>Modlitwa do Maryi Rozwiązującej Węzły</h3>
-<p>
-Matko Boża, która rozwiązujesz węzły,<nobr></nobr><br/>
-Ty wiesz, że moje życie jest pełne „węzłów”, które mnie dławią, przytłaczają i uciskają.<br/>
-Zawierzam się Tobie z ufnością, że je rozwiążesz,<br/>
-i przez Twe potężne wstawiennictwo Pan udzieli mi spokoju serca,<br/>
-zdrowia ciała i ducha, i zaprowadzi mnie do nieskończonej radości.<br/>
-Maryjo, nie pozwól, bym uległ pokusie,<br/>
-ale uwolnij mnie od wszelkiej niewoli, lęku i niepewności.<br/>
-Udziel mi Twej łaski, abym podążał właściwą ścieżką i nie popełniał błędów.<br/>
-Rozwiąż dziś moje węzły, a kiedy nadejdzie moja godzina,<br/>
-rozwiąż ostatni – węzeł mojej śmierci –<br/>
-abym ostatecznie wolny od jakiegokolwiek grzechu<br/>
-mógł wejść do szczęścia wiecznego. Amen.
-</p>`;
+  const reader = document.getElementById('reader');
+  const readerTitle = document.getElementById('reader-title');
+  const readerBody  = document.getElementById('reader-body');
+  const backBtn     = document.getElementById('backBtn');
 
-// — Podziękowanie i ekrany końcowe —
-const PODZIEKOWANIE_MARYI = `
-<h3>Podziękowanie Maryi Rozwiązującej Węzły</h3>
-<p>
-Maryjo Rozwiązująca Węzły, z radością w sercu, z duszą przepełnioną wdzięcznością powracam do Ciebie,<br/>
-aby podziękować za otrzymane łaski.<br/><br/>
+  const INLINE_CONTENT = {
+    'wiara/dom-modlitwy': '<p><em>Tu będzie treść artykułu do Moja Wiara — Dom modlitwy.</em> Dodaj opis jak przygotować w domu stałe miejsce modlitwy, proste rytuały i mały ołtarzyk (Pismo Święte, świeca, obrazek).</p>',
+    'wiara/swiadectwa-wiary': '<p><em>Tu będzie treść artykułu do Moja Wiara — Świadectwa wiary.</em> Wklej tu krótkie osobiste historie i linki do dłuższych świadectw.</p>',
+    'wiara/maryja-prowadzi': '<p><em>Tu będzie treść artykułu do Moja Wiara — Maryja prowadzi.</em> Napisz o wstawiennictwie Maryi w codzienności i praktyce różańca.</p>',
+    'arty/swiatlo-wiary': '<p><em>Tu będzie treść artykułu do Artykuły — Światło wiary.</em> Wprowadzenie do cyklu rozważań: nadzieja, miłość, wytrwałość.</p>',
+    'arty/pokoj-serca': '<p><em>Tu będzie treść artykułu do Artykuły — Pokój serca.</em> Krótka myśl o modlitwie serca i przebaczeniu.</p>',
+    'arty/duchowe-drogowskazy': '<p><em>Tu będzie treść artykułu do Artykuły — Duchowe drogowskazy.</em> Jak rozeznawać decyzje z Bogiem: Słowo, spowiedź, kierownictwo duchowe.</p>'
+  };
 
-Chcę być całkowicie Twój. Pomóż mi kroczyć wraz z Tobą drogą wierności Jezusowi w Jego Kościele.<br/><br/>
+  const TITLES = {
+    'wiara/dom-modlitwy': 'Dom modlitwy',
+    'wiara/swiadectwa-wiary': 'Świadectwa wiary',
+    'wiara/maryja-prowadzi': 'Maryja prowadzi',
+    'arty/swiatlo-wiary': 'Światło wiary',
+    'arty/pokoj-serca': 'Pokój serca',
+    'arty/duchowe-drogowskazy': 'Duchowe drogowskazy',
+  };
 
-Dziękuję, Święta Dziewico, za to, że zawsze trzymasz mnie z miłością za rękę<br/>
-i kierujesz moje serce ku miłości do Jezusa.<br/><br/>
+  const PATH = (slug) => {
+    const [sec, name] = slug.split('/');
+    if (sec === 'wiara') return `content/wiara/${name}.md`;
+    if (sec === 'arty')  return `content/arty/${name}.md`;
+    return null;
+  };
 
-Dziękuję, że uczysz mnie szukać mojego dobra jedynie w Bogu,<br/>
-który jest źródłem wszelkiego pokoju i łaski.<br/><br/>
-
-Dziękuję, że uczysz mnie pragnąć wypełniania tylko Jego woli,<br/>
-aby mógł urzeczywistniać we mnie plan, który odwiecznie ustanowił.<br/><br/>
-
-Dziękuję, że uczysz mnie życia z Jezusem i dla Jezusa.<br/>
-Dziękuję za to, że kiedy upadnę, pomagasz mi wrócić do Niego<br/>
-w sakramencie pojednania i radości.<br/><br/>
-
-Dzięki niemu, Święta Dziewico, z Bożym pokojem w sercu mogę nieść prawdziwą radość i prawdziwy pokój wszystkim.<br/>
-Wyproś mi wielką miłość do wszystkich sakramentów – znaków, które Twój Syn nam zostawił,<br/>
-aby się w nich z nami spotkać.<br/><br/>
-
-Dziękuję, Maryjo, że opiekujesz się moją rodziną.<br/>
-Spraw, aby zawsze pozostała zjednoczona i niezachwiana w nieskończonej miłości Boga.<br/><br/>
-
-Dziękuję, Maryjo, że udzielasz mojej rodzinie potrzebnych łask duchowych i materialnych.<br/>
-Proszę, pomnóż w nas wiarę, nadzieję i miłość.<br/><br/>
-
-<strong>Dziękuję, że pozwoliłaś mi odkryć moc tej nowenny. Amen.</strong>
-</p>`;
-
-const ZAKONCZ_DZIEN_INFO = `
-<h3>Ukończyłeś pierwszy dzień nowenny</h3>
-<p>Jutro, po zalogowaniu, otworzy się <strong>kolejny dzień nowenny</strong>. Kliknij <em>Dalej</em>, aby zakończyć dzień i wrócić do początku.</p>`;
-
-const ZAKONCZ_DZIEN_GENERIC = `
-<h3>Ukończyłeś ten dzień nowenny</h3>
-<p>Kliknij <em>Dalej</em>, aby wrócić do początku. Kolejny dzień otworzy się zgodnie z kalendarzem rozpoczęcia.</p>`;
-
-const ZAKONCZ_DZIEN_FINAL = `
-<h3>Ukończyłeś całą nowennę 🙏❤️ </h3>
-<p>Naciśnij <em>Dalej</em> lub <em>Reset</em>, aby zakończyć nowennę i powrócić do strony startowej.<br/>
-Niech Maryja prowadzi Cię dalej w codziennym życiu. ❤️🌿</p>`;
-
-// --- Litania i modlitwa św. Bernarda (skrót) ---
-const LITANIA_LORETANSKA = `
-<h3>Litania Loretańska do Najświętszej Maryi Panny</h3>
-<p>
-Kyrie eleison, Christe eleison, Kyrie eleison.<br/>
-Chryste, usłysz nas. Chryste, wysłuchaj nas.<br/>
-Ojcze z nieba, Boże — zmiłuj się nad nami.<br/>
-Synu, Odkupicielu świata, Boże — zmiłuj się nad nami.<br/>
-Duchu Święty, Boże — zmiłuj się nad nami.<br/>
-Święta Trójco, Jedyny Boże — zmiłuj się nad nami.<br/><br/>
-
-Święta Maryjo — módl się za nami.<br/>
-Święta Boża Rodzicielko — módl się za nami.<br/>
-Święta Panno nad pannami — módl się za nami.<br/>
-Matko Chrystusowa — módl się za nami.<br/>
-Matko Kościoła — módl się za nami.<br/>
-Matko łaski Bożej — módl się za nami.<br/>
-Matko nieskalana — módl się za nami.<br/>
-Matko najczystsza — módl się za nami.<br/>
-Matko dziewicza — módl się za nami.<br/>
-Matko nienaruszona — módl się za nami.<br/>
-Matko najmilsza — módl się za nami.<br/>
-Matko przedziwna — módl się za nami.<br/>
-Matko dobrej rady — módl się za nami.<br/>
-Matko Stworzyciela — módl się za nami.<br/>
-Matko Zbawiciela — módl się za nami.<br/><br/>
-
-Panno roztropna — módl się za nami.<br/>
-Panno czcigodna — módl się za nami.<br/>
-Panno wsławiona — módl się za nami.<br/>
-Panno można — módl się za nami.<br/>
-Panno łaskawa — módl się za nami.<br/>
-Panno wierna — módl się za nami.<br/><br/>
-
-Zwierciadło sprawiedliwości — módl się za nami.<br/>
-Stolico mądrości — módl się za nami.<br/>
-Przyczyno naszej radości — módl się za nami.<br/>
-Przybytku Ducha Świętego — módl się za nami.<br/>
-Przybytku chwalebny — módl się za nami.<br/>
-Przybytku sławny pobożności — módl się za nami.<br/>
-Różo duchowna — módl się za nami.<br/>
-Wieżo Dawidowa — módl się za nami.<br/>
-Wieżo z kości słoniowej — módl się za nami.<br/>
-Domie złoty — módl się za nami.<br/>
-Arko przymierza — módl się za nami.<br/>
-Bramo niebieska — módl się za nami.<br/>
-Gwiazdo zaranna — módl się za nami.<br/>
-Uzdrowienie chorych — módl się za nami.<br/>
-Ucieczko grzesznych — módl się za nami.<br/>
-Pocieszycielko strapionych — módl się za nami.<br/>
-Wspomożenie wiernych — módl się za nami.<br/><br/>
-
-Królowo Aniołów — módl się za nami.<br/>
-Królowo Patriarchów — módl się za nami.<br/>
-Królowo Proroków — módl się za nami.<br/>
-Królowo Apostołów — módl się za nami.<br/>
-Królowo Męczenników — módl się za nami.<br/>
-Królowo Wyznawców — módl się za nami.<br/>
-Królowo Dziewic — módl się za nami.<br/>
-Królowo Wszystkich Świętych — módl się za nami.<br/>
-Królowo bez zmazy pierworodnej poczęta — módl się za nami.<br/>
-Królowo Wniebowzięta — módl się za nami.<br/>
-Królowo Różańca Świętego — módl się za nami.<br/>
-Królowo rodzin — módl się za nami.<br/>
-Królowo pokoju — módl się za nami.<br/>
-Królowo Polski — módl się za nami.<br/><br/>
-
-Baranku Boży, który gładzisz grzechy świata — przepuść nam, Panie.<br/>
-Baranku Boży, który gładzisz grzechy świata — wysłuchaj nas, Panie.<br/>
-Baranku Boży, który gładzisz grzechy świata — zmiłuj się nad nami.<br/><br/>
-
-<b>W okresie wielkanocnym:</b><br/>
-P: Raduj się i wesel, Panno Maryjo, Alleluja.<br/>
-W: Bo zmartwychwstał Pan prawdziwie, Alleluja.<br/><br/>
-Módlmy się:<br/>
-Boże, który raczyłeś uweselić świat przez zmartwychwstanie Syna swego, Pana naszego Jezusa Chrystusa,<br/>
-daj prosimy, abyśmy przez Jego Rodzicielkę, Maryję Pannę, dostąpili radości życia wiecznego.<br/>
-Przez Chrystusa, Pana naszego. <strong>Amen.</strong><br/><br/>
-
-<b>Poza okresem wielkanocnym:</b><br/>
-P: Módl się za nami, święta Boża Rodzicielko.<br/>
-W: Abyśmy się stali godnymi obietnic Chrystusowych.<br/><br/>
-Módlmy się:<br/>
-Panie, nasz Boże, daj nam, sługom swoim, cieszyć się trwałym zdrowiem duszy i ciała,<nobr></nobr><br/>
-i za wstawiennictwem Najświętszej Maryi, zawsze Dziewicy,<br/>
-uwolnij nas od doczesnych utrapień i obdarz wieczną radością.<br/>
-Przez Chrystusa, Pana naszego. <strong>Amen.</strong>
-</p>`;
-
-const MODL_SW_BERNARDA = `
-<h3>Modlitwa św. Bernarda (Memorare)</h3>
-<p>
-Pomnij, o Najświętsza Panno Maryjo,<br/>
-że nigdy nie słyszano,<br/>
-abyś opuściła tego,<br/>
-kto się do Ciebie ucieka,<br/>
-Twej pomocy wzywa,<br/>
-Ciebie o przyczynę prosi.<br/><br/>
-
-Tą ufnością ożywiony,<br/>
-do Ciebie, o Panno nad pannami i Matko, biegnę,<br/>
-do Ciebie przychodzę,<br/>
-przed Tobą jako grzesznik płaczący staję.<br/><br/>
-
-O Matko Słowa,<br/>
-racz nie gardzić słowami moimi,<br/>
-ale usłysz je łaskawie i wysłuchaj.<br/><br/>
-<strong>Amen.</strong>
-</p>`;
-
-const CLOSING_PRAYER = `
-<h3>Modlitwa do Maryi Rozwiązującej Węzły</h3>
-<p>
-O Maryjo, Matko Chrystusa i Kościoła, Królowo narodów i rodzin,<br/>
-Ty, która nosiłaś w swym łonie Syna Bożego, Tego, który złamał jarzmo,<br/>
-jakie trzymało nas w niewoli grzechu, wyproś nam łaskę pozostania<br/>
-w prawdziwej wolności dzieci Bożych.<br/><br/>
-
-Twoimi świętymi dłońmi, Najczystsza Dziewico, Królowo pokoju,<nobr></nobr><br/>
-rozwiąż splątane węzły, które sprawiają, że nasze życie<br/>
-jest smutne i skomplikowane.<br/><br/>
-
-Pomóż nam oddać się służbie dobru z czystością i prostotą serca,<br/>
-zawsze w gotowości do przebaczenia i pojednania.<br/>
-Spraw, abyśmy – nie stawiając niczego ponad miłość Chrystusa –<br/>
-w Jego miłości szczerze kochali naszych braci.<br/><br/>
-
-<strong>Amen.</strong>
-</p>`;
-
-// --- Tajemnice różańca (pełne z wersji stabilnej) ---
-const MYSTERIES = {
-  radosne: {
-    name: 'tajemnice radosne',
-    first3: [
-      {t:'Zwiastowanie', m:'Prośmy o gotowość przyjęcia woli Bożej jak Maryja.'},
-      {t:'Nawiedzenie św. Elżbiety', m:'Ucz mnie służby i wrażliwości na potrzeby innych.'},
-      {t:'Narodzenie Pana Jezusa', m:'Oddaję Ci moje domy i relacje — niech będą miejscem pokoju.'}
-    ],
-    last2: [
-      {t:'Ofiarowanie w świątyni', m:'Przynoszę Ci, Panie, moje plany i lęki o przyszłość.'},
-      {t:'Odnalezienie w świątyni', m:'Odnajdź mnie, gdy się gubię; daj pragnienie Twojej mądrości.'}
-    ]
-  },
-  bolesne: {
-    name: 'tajemnice bolesne',
-    first3: [
-      {t:'Modlitwa w Ogrójcu', m:'Ucz mnie mówić: nie moja, lecz Twoja wola niech się stanie.'},
-      {t:'Biczowanie', m:'Złącz moje cierpienia z Twoimi — uzdrów serce.'},
-      {t:'Cierniem ukoronowanie', m:'Daj pokorę, gdy spotyka mnie niesprawiedliwość.'}
-    ],
-    last2: [
-      {t:'Dźwiganie krzyża', m:'Ucz mnie wytrwałości i miłości w trudnościach.'},
-      {t:'Śmierć na krzyżu', m:'Przebacz, jak Ty przebaczyłeś — zwłaszcza najtrudniejszym.'}
-    ]
-  },
-  chwalebne: {
-    name: 'tajemnice chwalebne',
-    first3: [
-      {t:'Zmartwychwstanie', m:'Odnów moją nadzieję i radość wiary.'},
-      {t:'Wniebowstąpienie', m:'Uczyń mnie świadkiem Twojej miłości w codzienności.'},
-      {t:'Zesłanie Ducha Świętego', m:'Napełnij mnie darami Ducha dla służby.'}
-    ],
-    last2: [
-      {t:'Wniebowzięcie NMP', m:'Ucz mnie ufać jak Maryja, aż do końca.'},
-      {t:'Ukoronowanie NMP', m:'Niech Maryja króluje w moim sercu i domu.'}
-    ]
-  },
-  swiatla: {
-    name: 'tajemnice światła',
-    first3: [
-      {t:'Chrzest w Jordanie', m:'Dziękuję za moje powołanie i chrzest — odnowisz we mnie łaskę.'},
-      {t:'Kana Galilejska', m:'Ulecz to, co słabnie w miłości — przemieniaj wodę codzienności w wino łaski.'},
-      {t:'Głoszenie Królestwa', m:'Daj mi nawrócenie serca i wierność Ewangelii.'}
-    ],
-    last2: [
-      {t:'Przemienienie', m:'Rozjaśnij moje decyzje Twoim światłem.'},
-      {t:'Eucharystia', m:'Uczyń moje serce eucharystycznym: wdzięczne i oddane.'}
-    ]
+  // ✅ JEDNA poprawna funkcja clearAll
+  function clearAll() {
+    [
+      tilesWiara, tilesArty, tilesModlitwy, tilesKsiazki,
+      tilesLinki, tilesRadio, tilesApki
+    ].forEach(el => el && (el.style.display = 'none'));
+    intro.style.display = 'none';
+    reader.style.display = 'none';
   }
-};
 
-// — Indywidualne modlitwy dnia (dla każdego z 9 dni)
-const DAILY_PRAYERS_BY_DAY = {
-  1: `<h3>Rozważanie dnia — Dzień 1</h3>
-  <p>Maryjo, Ty jesteś pełna łaski. Wiara mówi mi, że swoją mocą przed Bogiem wyprosisz mi to, o co Cię proszę, ponieważ będąc Matką, chcesz mnie wysłuchać.<br/>
-  Proszę, wysłuchaj mojej prośby, jestem pewien, że zawsze masz lekarstwo na moje słabości, nawet jeśli wydaje się, że już nic nie da się zrobić.<br/><br/>
-  Maryjo pełna łaski, która rozwiązujesz węzły dławiące Twoje dzieci, wyciągnij ku mnie swoje miłosierne ręce. Oddaję Ci dzisiaj ten węzeł (wymienić) i wszystkie jego negatywne konsekwencje w moim życiu.<br/>
-  Oddaję Ci ten węzeł (wymienić), który dręczy mnie i nie pozwala mi żyć w Bożym pokoju.<br/><br/>
-  O Maryjo, która rozwiązujesz węzły, wiem, że nigdy nie słyszano, by ktokolwiek uciekając się do Ciebie, błagając o Twoją pomoc i ochronę, został odrzucony.<br/>
-  Wierzę zatem, że możesz również rozwiązać mój węzeł, ponieważ Jezus, Twój umiłowany Syn, udziela Ci wszelkiej władzy.<br/>
-  Ufam, że go rozwiążesz, ponieważ jesteś moją Matką. Wiem, że to zrobisz, ponieważ kochasz mnie samą miłością Boga. Dziękuję Ci, moja umiłowana Matko.<br/><br/>
-  O Maryjo, Matko Dobrej Rady, weź ten węzeł (wymienić), który mi przeszkadza, i Twoją mocną ręką rozwiąż go.<br/>
-  Maryjo Rozwiązująca Węzły, módl się za mną.</p>`,
-
-  2: `<h3>Rozważanie dnia — Dzień 2</h3>
-  <p>Maryjo, Matko Pięknej Miłości, moje serce zwraca się do Ciebie, która znalazłaś łaskę u Boga.<br/>
-  Ty, która przyjmując pozdrowienie anioła ku zdumieniu całego stworzenia, wydałaś na świat swego Stwórcę, Matko dziewicza, miej litość dla mnie grzesznika.<br/><br/>
-  Wstrząsają mną fale pychy, ambicji, oszczerstw, zazdrości, gniewu, chciwości i pożądania ciała.<br/>
-  Zwracam się do Ciebie, Matko Rozwiązująca Węzły, abyś wyprosiła mi u Twego Syna Jezusa łaskę czystości serca, wolności od przywiązywania się, łaskę pokory, poddania się i zaufania Bogu.<br/>
-  Zobowiązuję się dziś do praktykowania tych cnót w dowód mojej miłości do Ciebie.<br/><br/>
-  Oddaję w Twoje ręce ten węzeł (wymienić), który uniemożliwia mi bycie odbiciem chwały Bożej. Nie gardź moim błaganiem, ale mnie wysłuchaj.<br/>
-  Daj mi, Matko Boga i moja Matko, iskierkę Twojej miłości do Jezusa.<br/><br/>
-  O Maryjo, Matko Dobrej Rady, weź ten węzeł (wymienić), który mi przeszkadza, i Twoją mocną ręką rozwiąż go.<br/>
-  Maryjo Rozwiązująca Węzły, módl się za mną.</p>`,
-
-  3: `<h3>Rozważanie dnia — Dzień 3</h3>
-  <p>Niech w każdej osobie dusza Maryi wywyższa Pana, niech w każdym człowieku dusza Maryi raduje się w Bogu.<br/>
-  Matko Boża i nasza Matko, umocnij moją wiarę, która jest tak krucha i niepewna.<br/><br/>
-  Maryjo Pośredniczko, Twoje ręce przyjmują i rozdają wszystkie bogactwa Króla.<br/>
-  Zwróć ku mnie swoje miłosierne oczy. Składam w Twoje święte dłonie ten węzeł mojego życia (wymienić) i wszystkie złe skutki i grzechy, których jest źródłem.<br/><br/>
-  Pomóż mi teraz wybaczyć wszystkim osobom, które świadomie lub nieświadomie przyczyniły się do tego węzła.<br/>
-  Przed Tobą, umiłowana Matko, i w imię Twojego Syna Jezusa, mojego Zbawiciela, który był tak obrażany i umiał przebaczyć, teraz wybaczam tym ludziom (wymienić) na zawsze.<br/><br/>
-  O Maryjo, Matko Dobrej Rady, weź ten węzeł (wymienić), który mi przeszkadza, i Twoją mocną ręką rozwiąż go.<br/>
-  Maryjo Rozwiązująca Węzły, módl się za mną.</p>`,
-
-  4: `<h3>Rozważanie dnia — Dzień 4</h3>
-  <p>Matko wielkiej miłości, życzliwa dla wszystkich potrzebujących, przyjdź mi z pomocą, tak jak pospieszyłaś do Elżbiety.<br/>
-  Składam w Twoje ręce ten węzeł (wymienić), który uniemożliwia mi bycie spokojnym, paraliżuje moją duszę, uniemożliwiając mi przyjście do mojego Pana i oddanie życia na Jego służbę.<br/><br/>
-  Matko, rozwiąż ten węzeł mojego życia (wymienić). Proś Jezusa, aby uzdrowił moją odrętwiałą wiarę, która pozwala się pokonać przez każdą trudność.<br/><br/>
-  Bądź ze mną, umiłowana Matko, abym uświadomił sobie, że przeszkody, jakie napotykam na swojej drodze, są okazją do umocnienia mnie w wierze i nauczenia się wdzięczności Bogu, który nie przestaje mnie wspierać swoją opatrznością.<br/><br/>
-  O Maryjo, Matko Dobrej Rady, weź ten węzeł (wymienić), który mi przeszkadza, i Twoją mocną ręką rozwiąż go.<br/>
-  Maryjo Rozwiązująca Węzły, módl się za mną.</p>`,
-
-  5: `<h3>Rozważanie dnia — Dzień 5</h3>
-  <p>Maryjo, wielkoduszna i pełna współczucia, która rozwiązujesz najbardziej zawikłane węzły, zwracam się do Ciebie, aby jeszcze raz oddać ten węzeł (wymienić) w Twoje ręce.<br/>
-  Proszę Cię o Bożą mądrość, abym działał w świetle Ducha Świętego i rozwiązał wszelkie trudności.<br/><br/>
-  Twoje słowa są tak pełne słodyczy, że można w Tobie ujrzeć Serce Boga.<br/>
-  Uwolnij mnie od goryczy, gniewu i nienawiści, jakie zrodził we mnie ten węzeł (wymienić), który usilnie Ci przedstawiłem.<br/><br/>
-  Umiłowana Matko, obdarz mnie Twoją słodyczą i mądrością, abym nauczył się rozważać wszystko w ciszy, w swoim sercu, prowadząc z Panem pełen miłości dialog o wszystkim, co mi się przydarza.<br/><br/>
-  O Maryjo, Matko Dobrej Rady, weź ten węzeł (wymienić), który mi przeszkadza, i Twoją mocną ręką rozwiąż go.<br/>
-  Maryjo Rozwiązująca Węzły, módl się za mną.</p>`,
-
-  6: `<h3>Rozważanie dnia — Dzień 6</h3>
-  <p>Matko, podobnie jak apostoł Jan chcę Cię zabrać do mego domu, w głębię mego serca, aby nauczyć się od Ciebie, jak upodobnić się do Twego Syna.<br/>
-  Stoję przed Tobą, aby powierzyć się Twojej matczynej trosce.<br/><br/>
-  Królowo Miłosierdzia, zawierzam Ci ten węzeł mego życia (wymienić) i proszę, abyś dała mi serce, które potrafi być cierpliwe, podczas gdy Ty rozwiązujesz to poplątanie.<br/><br/>
-  Naucz mnie wytrwale słuchać słów Twojego Syna, przyjmować sakramenty pojednania i Eucharystii.<br/>
-  I tak jak to czyniłaś w Wieczerniku przed zesłaniem Ducha Świętego, wstawiaj się u Twego umiłowanego Syna, aby udzielił mi obficie Ducha Świętego.<br/><br/>
-  Niech Duch Święty otworzy moje serce na pokój, sprawiedliwość i miłość.<br/><br/>
-  O Maryjo, Matko Dobrej Rady, weź ten węzeł (wymienić), który mi przeszkadza, i Twoją mocną ręką rozwiąż go.<br/>
-  Maryjo Rozwiązująca Węzły, módl się za mną.</p>`,
-
-  7: `<h3>Rozważanie dnia — Dzień 7</h3>
-  <p>Najczystsza i Niepokalana Maryjo, zwracam się dziś do Ciebie. Błagam Cię, abyś rozwiązała ten węzeł mego życia (wymienić) i uwolniła mnie od uczynków zła.<br/>
-  Bóg dał Ci wielką moc nad wszystkimi demonami. Dziś wyrzekam się zła i wszelkich więzów, które mnie z nim łączyły.<br/>
-  Ogłaszam, że Jezus jest moim jedynym Zbawicielem i Panem.<br/><br/>
-  O Maryjo, która rozwiązujesz węzły, zmiażdż głowę Złego. Zniszcz pułapki, które przyczyniły się do powstania węzłów w moim życiu.<br/><br/>
-  Tobie, Jutrzenko Zbawienia, polecam moją drogę, abym pod Twoim przewodnictwem odkrył Chrystusa — światłość świata i Zbawiciela.<br/>
-  Panie, uwolnij mnie przez moc Twojej drogocennej krwi.<br/><br/>
-  O Maryjo, Matko Dobrej Rady, weź ten węzeł (wymienić), który mi przeszkadza, i Twoją mocną ręką rozwiąż go.<br/>
-  Maryjo Rozwiązująca Węzły, módl się za mną.</p>`,
-
-  8: `<h3>Rozważanie dnia — Dzień 8</h3>
-  <p>Dziewicza Matko Boża, bogata w miłosierdzie, zmiłuj się nade mną i rozwiąż ten węzeł mego życia (wymienić).<br/>
-  Potrzebuję, byś mnie nawiedziła tak jak Elżbietę. Przynieś mi Jezusa, aby On udzielił mi Ducha Świętego.<br/><br/>
-  Naucz mnie praktykować cnotę pokory, miłości i — podobnie jak Elżbiecie — wyproś mi, bym został napełniony Duchem Świętym i radością bez końca.<br/><br/>
-  Maryjo, Matko moja, oddaję Ci moje serce i wszystko, co do mnie należy: mój dom, rodzinę, dobra materialne i duchowe.<br/>
-  Daj mi Twoje serce, abym mógł wypełniać wolę Bożą każdego dnia mego życia.<br/><br/>
-  O Maryjo, Matko Dobrej Rady, weź ten węzeł (wymienić), który mi przeszkadza, i Twoją mocną ręką rozwiąż go.<br/>
-  Maryjo Rozwiązująca Węzły, módl się za mną.</p>`,
-
-  9: `<h3>Rozważanie dnia — Dzień 9</h3>
-  <p>Uciekam się do Ciebie, najczystsza Dziewico i Matko moja. Nie gardź moim błaganiem, ale pochyl się do mojej prośby i wysłuchaj mnie.<br/>
-  Rozwiąż, proszę, ten węzeł w moim życiu (wymienić). Ty wiesz, jakiego bólu i cierpienia mi przysparza.<br/><br/>
-  Dziękuję, Matko, bo w swoim miłosierdziu ocierasz moje łzy.<br/>
-  Dziękuję, że przyjmujesz mnie w swoje ramiona i przygotowujesz mnie do otrzymania kolejnej łaski od Boga.<br/>
-  Maryjo, która rozwiązujesz węzły, i moja ukochana Matko, dziękuję za rozwiązywanie węzłów mego życia.<br/><br/>
-  Maryjo, bądź dla mnie przykładem i przewodniczką. Okryj mnie Twoim płaszczem miłości i napełnij mnie pokojem, jaki tylko Bóg może mi dać.<br/><br/>
-  O Maryjo, Matko Dobrej Rady, weź ten węzeł (wymienić), który mi przeszkadza, i Twoją mocną ręką rozwiąż go.<br/>
-  Maryjo Rozwiązująca Węzły, módl się za mną.</p>`
-};
-
-/* ============================
-   [NOWE] — Ekran OPISU (krok pomocniczy)
-   ============================ */
-const INTRO_HTML = `
-<h3>Opis nowenny</h3>
-<p>Nowenna do Maryi Rozwiązującej Węzły to modlitwa powierzająca Matce Bożej trudne, „poplątane” sprawy życia – grzechy, nałogi, konflikty czy cierpienia, które człowiek sam nie potrafi rozwiązać. Jej źródła sięgają XVII wieku (obraz w Augsburgu), ale szczególną popularność zdobyła dzięki propagowaniu przez papieża Franciszka, jeszcze gdy był arcybiskupem Buenos Aires. W Kościele katolickim cieszy się dużym uznaniem jako skuteczna forma wstawiennictwa Maryi – wielu wiernych świadczy o otrzymanych łaskach i przemianach, dlatego jest dziś jedną z najbardziej rozpowszechnionych nowenn maryjnych na świecie.</p>
-
-<p>Nowenna obejmuje dziewięć dni modlitwy, podczas których prosimy Maryję, aby rozwiązała węzeł konkretnej trudności. Każdego dnia powierzamy Jej serce i życie w duchu zaufania, modląc się na różańcu i rozważając tajemnice Chrystusa.</p>
-
-<p>Kliknij <strong>„Dalej”</strong>, aby rozpocząć dzień pierwszy nowenny.</p>
-`;
-
-
-function mysteriesLinksHTML(){
-  return `
-  <h3>Części różańca (tajemnice z dnia)</h3>
-  <p>Kliknij w aktualny dzień tygodnia, aby przejść dalej.</p>
-  <ul>
-    <li><a data-rosary='radosne' href='#tajemnice-radosne'>Poniedziałek – radosne</a></li>
-    <li><a data-rosary='bolesne' href='#tajemnice-bolesne'>Wtorek – bolesne</a></li>
-    <li><a data-rosary='chwalebne' href='#tajemnice-chwalebne'>Środa – chwalebne</a></li>
-    <li><a data-rosary='swiatla' href='#tajemnice-swiatla'>Czwartek – światła</a></li>
-    <li><a data-rosary='bolesne' href='#tajemnice-bolesne'>Piątek – bolesne</a></li>
-    <li><a data-rosary='radosne' href='#tajemnice-radosne'>Sobota – radosne</a></li>
-    <li><a data-rosary='chwalebne' href='#tajemnice-chwalebne'>Niedziela – chwalebne</a></li>
-  </ul>
-  <p class='hint'>W środku używaj przycisków „Wstecz/Dalej”.</p>`;
-}
-
-// --- Kroki dzienne — SZABLON I PEŁNE 9 DNI (jak w stabilnej) ---
-function buildDay(intencje, {finalInfo=false} = {}){
-  const arr = [
-    ...intencje,
-    mysteriesLinksHTML(),
-    PODZIEKOWANIE_MARYI
-  ];
-  if(finalInfo===true){
-    arr.push(ZAKONCZ_DZIEN_INFO);
-  } else if(finalInfo==='generic'){
-    arr.push(ZAKONCZ_DZIEN_GENERIC);
-  } else if(finalInfo==='final'){
-    arr.push(ZAKONCZ_DZIEN_FINAL);
-  }
-  return arr;
-}
-
-const DAYS = [
-  // 1
-  buildDay([
-    '<h3>Dzień 1 nowenny</h3><p>✝️ W imię Ojca i Syna i Ducha Świętego. Amen.<br/>Powierzam Ci, Panie, wszystkie węzły mojego życia.</p><p class="wezel-info"><em>A w tej nowennie powierzam węzeł (…) </em></p>',
-    SEKWE,
-    SKLAD,
-    AKT_ZALU,
-    MODL_MARYJA
-  ], { finalInfo:true }),
-
-  // 2
-  buildDay([
-    '<h3>Dzień 2 nowenny</h3><p>✝️ W imię Ojca i Syna i Ducha Świętego. Amen.<br/>Powierzam Ci, Panie, wszystkie węzły mojego życia.</p><p class="wezel-info"><em>A w tej nowennie powierzam węzeł (…) </em></p>',
-    SEKWE,
-    SKLAD,
-    AKT_ZALU,
-    MODL_MARYJA
-  ], { finalInfo:'generic' }),
-
-  // 3
-  buildDay([
-    '<h3>Dzień 3 nowenny</h3><p>✝️ W imię Ojca i Syna i Ducha Świętego. Amen.<br/>Powierzam Ci, Panie, wszystkie węzły mojego życia.</p><p class="wezel-info"><em>A w tej nowennie powierzam węzeł (…) </em></p>',
-    SEKWE,
-    SKLAD,
-    AKT_ZALU,
-    MODL_MARYJA
-  ], { finalInfo:'generic' }),
-
-  // 4
-  buildDay([
-    '<h3>Dzień 4 nowenny</h3><p>✝️ W imię Ojca i Syna i Ducha Świętego. Amen.<br/>Powierzam Ci, Panie, wszystkie węzły mojego życia.</p><p class="wezel-info"><em>A w tej nowennie powierzam węzeł (…) </em></p>',
-    SEKWE,
-    SKLAD,
-    AKT_ZALU,
-    MODL_MARYJA
-  ], { finalInfo:'generic' }),
-
-  // 5
-  buildDay([
-    '<h3>Dzień 5 nowenny</h3><p>✝️ W imię Ojca i Syna i Ducha Świętego. Amen.<br/>Powierzam Ci, Panie, wszystkie węzły mojego życia.</p><p class="wezel-info"><em>A w tej nowennie powierzam węzeł (…) </em></p>',
-    SKLAD,
-    AKT_ZALU,
-    MODL_MARYJA
-  ], { finalInfo:'generic' }),
-
-  // 6
-  buildDay([
-    '<h3>Dzień 6 nowenny</h3><p>✝️ W imię Ojca i Syna i Ducha Świętego. Amen.<br/>Powierzam Ci, Panie, wszystkie węzły mojego życia.</p><p class="wezel-info"><em>A w tej nowennie powierzam węzeł (…) </em></p>',
-    SEKWE,
-    SKLAD,
-    AKT_ZALU,
-    MODL_MARYJA
-  ], { finalInfo:'generic' }),
-
-  // 7
-  buildDay([
-    '<h3>Dzień 7 nowenny</h3><p>✝️ W imię Ojca i Syna i Ducha Świętego. Amen.<br/>Powierzam Ci, Panie, wszystkie węzły mojego życia.</p><p class="wezel-info"><em>A w tej nowennie powierzam węzeł (…) </em></p>',
-    SEKWE,
-    SKLAD,
-    AKT_ZALU,
-    MODL_MARYJA
-  ], { finalInfo:'generic' }),
-
-  // 8
-  buildDay([
-    '<h3>Dzień 8 nowenny</h3><p>✝️ W imię Ojca i Syna i Ducha Świętego. Amen.<br/>Powierzam Ci, Panie, wszystkie węzły mojego życia.</p><p class="wezel-info"><em>A w tej nowennie powierzam węzeł (…) </em></p>',
-    SKLAD,
-    AKT_ZALU,
-    MODL_MARYJA
-  ], { finalInfo:'generic' }),
-
-  // 9
-  buildDay([
-    '<h3>Dzień 9 nowenny</h3><p>✝️ W imię Ojca i Syna i Ducha Świętego. Amen.<br/>Powierzam Ci, Panie, wszystkie węzły mojego życia.</p><p class="wezel-info"><em>A w tej nowennie powierzam węzeł (…) </em></p>',
-    SKLAD,
-    AKT_ZALU,
-    MODL_MARYJA
-  ], { finalInfo:'final' })
-
-];
-
-// --- UI refs i stan ---
-const LS_THEME = 'nowenna_theme';
-const LS_PREFIX = 'nowenna_wezly_';
-
-const ui = {
-  themeBtn: document.getElementById('themeBtn'),
-  nameInput: document.getElementById('nameInput'),
-  startBtn: document.getElementById('startBtn'),
-  nameBtn: document.getElementById('nameBtn'),
-  peekBtn: document.getElementById('peekBtn'),
-  prevBottom: document.getElementById('prevBottom'),
-  nextBottom: document.getElementById('nextBottom'),
-  content: document.getElementById('content'),
-  metaDay: document.getElementById('metaDay'),
-  metaStep: document.getElementById('metaStep'),
-  dotsWrap: document.getElementById('footerDots'),
-  toast: document.getElementById('toast'),
-  toastMsg: document.getElementById('toastMsg'),
-  nameMenu: document.getElementById('nameMenu')
-};
-
-// [NOWE] — intro:false w stanie
-let state = {
-  name: '',
-  day: 1,
-  step: 0,
-  done: Array(9).fill(false),
-  start_date: null,
-  preview: false,
-  rosary: null,
-  lastRosaryType: null,
-  fromRosaryExit: false,
-  intro: false
-};
-let snapshot = null;
-
-function keyFor(name){ return LS_PREFIX + name.toLowerCase().trim(); }
-function save(){
-  if(!state.name) return;
-  if(state.preview) return;
-  if(TESTING) return;
-  localStorage.setItem(keyFor(state.name), JSON.stringify({
-    display_name: state.name,
-    day:state.day,
-    step:state.step,
-    done:state.done,
-    start_date: state.start_date
-    // intro celowo nie zapisujemy
-  }));
-}
-function clearFor(name){ localStorage.removeItem(keyFor(name)); }
-function load(name){
-  const raw = localStorage.getItem(keyFor(name));
-  if(!raw){ state = { ...state, name, day:1, step:0, done:Array(9).fill(false), start_date: todayISO(), preview:false, rosary:null, intro:false }; return; }
-  try{
-    const d = JSON.parse(raw);
-    state = {
-      ...state,
-      name: d.display_name || name,
-      day: d.day||1,
-      step: d.step||0,
-      done: Array.isArray(d.done)? d.done.slice(0,9).concat(Array(9).fill(false)).slice(0,9) : Array(9).fill(false),
-      start_date: d.start_date || todayISO(),
-      preview:false,
-      rosary:null,
-      intro:false
-    };
-  }catch(e){ state = { ...state, name, day:1, step:0, done:Array(9).fill(false), start_date: todayISO(), preview:false, rosary:null, intro:false }; }
-}
-
-// --- Daty ---
-function pad(n){ return String(n).padStart(2,'0'); }
-function toISODate(d){ return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
-function todayISO(){ const d = new Date(); return toISODate(new Date(d.getFullYear(), d.getMonth(), d.getDate())); }
-function parseISODate(s){ const [y,m,da] = s.split('-').map(Number); return new Date(y, m-1, da); }
-function formatPL(d){ return `${pad(d.getDate())}.${pad(d.getMonth()+1)}.${d.getFullYear()}`; }
-function addDays(base, days){ const d = new Date(base.getTime()); d.setDate(d.getDate()+days); return d; }
-function dateForDay(day){ if(!state.start_date) return null; const start = parseISODate(state.start_date); return addDays(start, day-1); }
-function dayFromStart(){
-  if(!state.start_date) return 1;
-  const start = parseISODate(state.start_date);
-  const today = parseISODate(todayISO());
-  const diffMs = today - start;
-  const days = Math.floor(diffMs / (24*60*60*1000));
-  return Math.min(9, Math.max(1, days + 1));
-}
-
-function msUntilNextMidnight(){
-  const now = new Date();
-  const next = new Date(now.getFullYear(), now.getMonth(), now.getDate()+1, 0,0,0,0);
-  return next - now;
-}
-function syncDayToCalendar(){
-  if(!state.name || state.preview) return;
-  const idx = dayFromStart();
-  if(state.day !== idx){ state.day = idx; state.step = 0; render(); }
-}
-let midnightTimer = null;
-function scheduleMidnightSync(){
-  if(midnightTimer){ clearTimeout(midnightTimer); clearInterval(midnightTimer); midnightTimer = null; }
-  midnightTimer = setTimeout(()=>{
-    syncDayToCalendar();
-    midnightTimer = setInterval(syncDayToCalendar, 24*60*60*1000);
-  }, msUntilNextMidnight());
-}
-
-// --- UI helpers ---
-function setTheme(mode){ const root = document.documentElement; if(mode === 'dark') root.classList.add('dark'); else root.classList.remove('dark'); localStorage.setItem(LS_THEME, mode); }
-function toggleTheme(){ const isDark = document.documentElement.classList.contains('dark'); setTheme(isDark? 'light' : 'dark'); }
-function initTheme(){ const saved = localStorage.getItem(LS_THEME); if(saved){ setTheme(saved); } else { const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches; setTheme(prefersDark? 'dark':'light'); } }
-
-function updateStartButton(){
-  if (isResetEligible()) {
-    ui.startBtn.disabled = false;
-    return;
-  }
-  ui.startBtn.disabled = !canStart();
-}
-
-function stepsForCurrent(){ return DAYS[state.day-1]; }
-
-// — Czy są linki do różańca w tym dniu
-function hasRosaryForCurrentDay(){
-  const steps = DAYS[state.day-1] || [];
-  return steps.some(s => typeof s === 'string' && s.includes('data-rosary'));
-}
-function totalForDay(){
-  const baseLen = (DAYS[state.day-1]||[]).length;
-  return baseLen + (hasRosaryForCurrentDay() ? 9 : 0);
-}
-function rosaryLinkIndex(){
-  const steps = DAYS[state.day-1] || [];
-  for(let i=0;i<steps.length;i++){
-    if(typeof steps[i]==='string' && steps[i].includes('data-rosary')) return i;
-  }
-  return -1;
-}
-function displayStepNumberForBaseStep(baseIdx){
-  const linkIdx = rosaryLinkIndex();
-  if(linkIdx === -1) return baseIdx + 1;
-  if(baseIdx < linkIdx) return baseIdx + 1;
-  if(baseIdx === linkIdx) return baseIdx + 1;
-  return baseIdx + 1 + 9;
-}
-
-// ❗ WYMUSZAMY WYBÓR TAJEMNICY ZAWSZE — także w podglądzie
-function isRosarySelectionStep(){
-  const steps = stepsForCurrent();
-  const cur = steps[state.step];
-  return !state.rosary && typeof cur === 'string' && cur.includes('data-rosary');
-}
-
-function isResetEligible(){
-  if(!state.name) return false;
-  if(state.day!==9) return false;
-  const steps = stepsForCurrent();
-  return state.step === steps.length - 1;
-}
-function canStart(){
-  const typed = ui.nameInput.value.trim();
-  if(!typed) return false;
-  if(state.name && typed.toLowerCase() === state.name.toLowerCase()) return false;
-  return true;
-}
-
-// --- Różaniec ---
-function startRosary(type){
-  state.lastRosaryType = type;
-  state.rosary = { type, phase:'first3', index:0 };
-  render();
-}
-function rosaryCurrentHTML(){
-  const R = state.rosary;
-  const pack = MYSTERIES[R.type];
-
-  if(R.phase==='first3'){
-    const cur = pack.first3[R.index];
-    return `
-      <h3>${pack.name} — dziesiątek ${R.index+1}/3</h3>
-      <p><strong>${cur.t}</strong><br/>${cur.m}</p>
-      <p class='hint'>Odmów: Ojcze nasz • 10× Zdrowaś Maryjo • Chwała Ojcu.</p>
-    `;
-  }
-  if(R.phase==='dailyPrayer'){
-    return DAILY_PRAYERS_BY_DAY[String(state.day)] || DAILY_PRAYERS_BY_DAY[state.day] || '<h3>Modlitwa dnia</h3><p>Panie, prowadź mnie dziś i umacniaj w miłości. Amen.</p>';
-  }
-  if(R.phase==='last2'){
-    const cur = pack.last2[R.index];
-    return `
-      <h3>${pack.name} — dziesiątek ${R.index+1}/2 (końcowe)</h3>
-      <p><strong>${cur.t}</strong><br/>${cur.m}</p>
-      <p class='hint'>Odmów: Ojcze nasz • 10× Zdrowaś Maryjo • Chwała Ojcu.</p>
-    `;
-  }
-  if(R.phase==='litania'){ return LITANIA_LORETANSKA; }
-  if(R.phase==='bernard'){ return MODL_SW_BERNARDA; }
-  if(R.phase==='closing'){ return CLOSING_PRAYER; }
-  return '';
-}
-function rosaryStageLabel(){
-  if(!state.rosary) return '';
-  const R = state.rosary; const pack = MYSTERIES[R.type];
-  switch(R.phase){
-    case 'first3': return `${pack.name} — dziesiątek ${R.index+1}/3`;
-    case 'dailyPrayer': return `Modlitwa dnia (${pack.name})`;
-    case 'last2': return `${pack.name} — dziesiątek ${R.index+1}/2 (końcowe)`;
-    case 'litania': return 'Litania Loretańska';
-    case 'bernard': return 'Modlitwa św. Bernarda';
-    case 'closing': return 'Modlitwa na zakończenie';
-    default: return '';
-  }
-}
-function bindRosaryLinks(){
-  const links = ui.content.querySelectorAll('a[data-rosary]');
-  links.forEach(a=>{
-    a.addEventListener('click', (e)=>{
-      e.preventDefault();
-      const t = a.getAttribute('data-rosary');
-      if(!t) return;
-      startRosary(t);
+  function setActive(btn) {
+    buttons.forEach(b => { 
+      b.classList.remove('active'); 
+      b.setAttribute('aria-pressed','false'); 
     });
-  });
-}
-
-// --- Render ---
-function render(){
-  updateStartButton();
-
-  if(!state.name){
-    ui.content.innerHTML = 'Podaj imię i kliknij „Start”, aby zacząć dzień 1. Albo kliknij w ikonkę postaci, by wybrać wcześniej zapisanych użytkowników.';
-    ui.metaDay.textContent = 'Dzień –';
-    ui.metaStep.textContent = 'Krok –/–';
-  } else {
-    if(state.intro){
-      // [NOWE] — ekran opisu
-      ui.content.innerHTML = INTRO_HTML;
-      const d = dateForDay(state.day);
-      const dateStr = d ? formatPL(d) : '—';
-      ui.metaDay.textContent = `Dzień ${state.day} z 9 — ${dateStr}`;
-      ui.metaStep.textContent = `Opis`;
-    } else if(state.rosary){
-      ui.content.innerHTML = rosaryCurrentHTML();
-      const d = dateForDay(state.day);
-      const dateStr = d ? formatPL(d) : '—';
-      ui.metaDay.textContent = `Dzień ${state.day} z 9 — ${dateStr}`;
-      ui.metaStep.textContent = `Krok … z ${totalForDay()}`;
-    } else {
-      const steps = stepsForCurrent();
-      const safeStep = Math.max(0, Math.min(state.step, steps.length-1));
-      state.step = safeStep;
-      ui.content.innerHTML = steps[safeStep];
-      const d = dateForDay(state.day);
-      const dateStr = d ? formatPL(d) : '—';
-      ui.metaDay.textContent = `Dzień ${state.day} z 9 — ${dateStr}`;
-      ui.metaStep.textContent = `Krok ${displayStepNumberForBaseStep(safeStep)} z ${totalForDay()}`;
+    if (btn) { 
+      btn.classList.add('active'); 
+      btn.setAttribute('aria-pressed','true'); 
     }
   }
 
-  // Dots
-  if (!ui.dotsWrap) {
-    console.warn('Brak kontenera #footerDots — pomijam render kropek.');
-  } else {
-    ui.dotsWrap.innerHTML = '';
-    for (let i = 1; i <= 9; i++) {
-      const dot = document.createElement('div');
-      dot.className = 'dot';
-      if (state.name || state.preview) {
-        const isDone =
-          !!(state.done[i - 1]) ||
-          i < state.day ||
-          (i === state.day && (state.step > 0 || !!state.rosary || state.intro));
-        if (isDone) dot.classList.add('done');
-        if (i === state.day) dot.classList.add('current');
-      }
-      const dt = state.name ? dateForDay(i) : null;
-      dot.title = state.name && dt ? `Dzień ${i} — ${formatPL(dt)}` : `Dzień ${i}`;
-      ui.dotsWrap.appendChild(dot);
-    }
-  }
-
-  // Nawigacja
-  const canNavigate = state.name || state.preview;
-  const stepsArr = canNavigate ? stepsForCurrent() : null;
-  const atFirst = !stepsArr || state.step===0;
-  const atLast  = !stepsArr || state.step===stepsArr.length-1;
-  const disablePrevBase = !canNavigate || (atFirst && !(state.preview && state.day>1));
-  let disablePrev = disablePrevBase;
-  let disableNext = !canNavigate || (atLast  && !(state.preview && state.day<9));
-
-  // blokada „Dalej” na ekranie linków różańca
-  if(isRosarySelectionStep()) disableNext = true;
-
-  // Ekrany końcowe — Next aktywny
-  if (
-    state.name && stepsArr && (
-      stepsArr[state.step] === ZAKONCZ_DZIEN_INFO ||
-      stepsArr[state.step] === ZAKONCZ_DZIEN_GENERIC ||
-      stepsArr[state.step] === ZAKONCZ_DZIEN_FINAL
-    )
-  ){
-    disableNext = false;
-  }
-
-  // [NOWE] — na kroku 1 pokaż „⟵ Opis” i włącz Wstecz
-  if (!state.preview && state.name && !state.intro && state.step === 0) {
-    disablePrev = false;
-    ui.prevBottom.textContent = '⟵ Opis';
-  } else {
-    ui.prevBottom.textContent = '⟵ Wstecz';
-  }
-
-  // W trybie opisu — „Dalej” zawsze dostępny (wychodzi do kroku 1)
-  if (state.intro) {
-    disableNext = false;
-  }
-
-  ui.prevBottom.disabled = disablePrev;
-  ui.nextBottom.disabled = disableNext;
-
-  // Start/Reset
-  ui.startBtn.textContent = isResetEligible() ? 'Reset' : 'Start';
-
-  // Linki różańca — podpinaj w normalnym trybie i w podglądzie (ale nie w opisie)
-  if(!state.rosary && (state.name || state.preview) && !state.intro){
-    const s = stepsForCurrent();
-    if(s[state.step] && s[state.step].includes('data-rosary')) bindRosaryLinks();
-  }
-
-  // Pasek informacyjny o podglądzie
-  const previewBar = document.getElementById('previewInfo');
-  if (previewBar) previewBar.style.display = state.preview ? 'block' : 'none';
-}
-
-// — Reset wewnętrzny (bez przeładowania strony)
-function resetAll(){
-  if(state.name){
-    state.done[state.day-1] = true;
-    save();
-  }
-  state = { name:'', day:1, step:0, done:Array(9).fill(false), start_date:null, preview:false, rosary:null, lastRosaryType:null, fromRosaryExit:false, intro:false };
-  snapshot = null;
-  ui.nameInput.value = '';
-  if(ui.peekBtn) ui.peekBtn.classList.remove('active');
-  render();
-}
-
-// Minimalny toast (tylko powitanie)
-function showToast(msg){
-  ui.toastMsg.textContent = msg;
-  ui.toast.classList.add('show');
-  setTimeout(()=> ui.toast.classList.remove('show'), 3600);
-}
-
-// --- Nawigacja ---
-function nextStep(){
-  // [NOWE] — z OPISU wchodzimy do kroku 1
-  if (state.intro) {
-    state.intro = false;
-    state.step = 0;
-    render();
-    return;
-  }
-
-  // Różaniec — wewnętrzna ścieżka
-  if(state.rosary){
-    const R = state.rosary;
-    if(R.phase==='first3'){
-      if(R.index<2){ R.index++; render(); return; }
-      R.phase='dailyPrayer'; render(); return;
-    }
-    if(R.phase==='dailyPrayer'){
-      R.phase='last2'; R.index=0; render(); return;
-    }
-    if(R.phase==='last2'){
-      if(R.index<1){ R.index++; render(); return; }
-      R.phase='litania'; render(); return;
-    }
-    if(R.phase==='litania'){ R.phase='bernard'; render(); return; }
-    if(R.phase==='bernard'){ R.phase='closing'; render(); return; }
-    if(R.phase==='closing'){
-      state.rosary = null;
-      const steps = stepsForCurrent();
-      if(state.step < steps.length-1){
-        state.step += 1;
-        state.fromRosaryExit = true;
-        save(); render();
-      } else {
-        state.done[state.day-1] = true; save(); render();
-      }
+  function showSection(section, button) {
+    const isActive = button.classList.contains('active');
+    if (isActive) {
+      setActive(null);
+      clearAll();
+      intro.style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      location.hash = '';
       return;
     }
+
+    setActive(button);
+    clearAll();
+    if(section === 'wiara')        tilesWiara.style.display = 'grid';
+    else if(section === 'arty')    tilesArty.style.display = 'grid';
+    else if(section === 'modlitwy')tilesModlitwy.style.display = 'grid';
+    else if(section === 'ksiazki') tilesKsiazki.style.display = 'grid';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  const steps = stepsForCurrent();
+  btnWiara.addEventListener('click',   () => { showSection('wiara', btnWiara); location.hash = '#wiara'; });
+  btnArty.addEventListener('click',    () => { showSection('arty', btnArty); location.hash = '#arty'; });
+  btnModlitwy.addEventListener('click',() => { showSection('modlitwy', btnModlitwy); location.hash = '#modlitwy'; });
+  btnKsiazki.addEventListener('click', () => { showSection('ksiazki', btnKsiazki); location.hash = '#ksiazki'; });
 
-  // Ekran końcowy Dnia 1 -> reset (poza podglądem)
-  if(!state.preview && state.name && state.day === 1 && steps[state.step] === ZAKONCZ_DZIEN_INFO){
-    resetAll();
-    return;
-  }
-  // Ekran końcowy Dni 2–9 -> reset (poza podglądem)
-  if(!state.preview && state.name && steps[state.step] === ZAKONCZ_DZIEN_GENERIC){
-    resetAll();
-    return;
-  }
+  // 🔽 Dolne przyciski: Linki / Radio / Apki
+  btnLinki.addEventListener('click', () => {
+    clearAll();
+    setActive(null);
+    tilesLinki.style.display = 'flex';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
 
-  // Podgląd
-  if(state.preview){
-    if(state.step < steps.length-1){ state.step += 1; render(); return; }
-    if(state.day < 9){ state.day += 1; state.step = 0; render(); return; }
-    // Podgląd i koniec Dnia 9 -> reset do startu
-    resetAll();
-    return;
-  }
+  btnRadio.addEventListener('click', () => {
+    clearAll();
+    setActive(null);
+    tilesRadio.style.display = 'flex';   // osobna sekcja z radiami
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
 
-  if(!state.name) return;
+  btnApki.addEventListener('click', () => {
+    clearAll();
+    setActive(null);
+    tilesApki.style.display = 'grid';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
 
-  // Zwykłe przejście
-  if(state.step < steps.length-1){
-    state.step += 1;
-    state.fromRosaryExit = false;
-    save(); render(); return;
-  }
+  async function showArticle(section, name) {
+    const map = { wiara: btnWiara, arty: btnArty };
+    setActive(map[section] || null);
+    clearAll();
 
-  // Koniec dnia (2–9)
-  state.done[state.day-1] = true; save();
-  if(state.day===9){
-    render();
-  } else {
-    state.step = 0; render();
-  }
-}
+    const slug = `${section}/${name}`;
+    readerTitle.textContent = TITLES[slug] || 'Artykuł';
 
-function prevStep(){
-  // [NOWE] — na kroku 1 „Wstecz” otwiera OPIS
-  if (state.name && !state.preview && !state.intro && state.step === 0) {
-    state.intro = true;
-    render();
-    return;
-  }
-  // [NOWE] — będąc w OPISIE „Wstecz” wraca do kroku 1
-  if (state.intro) {
-    state.intro = false;
-    state.step = 0;
-    render();
-    return;
-  }
-
-  if(state.rosary){
-    const R = state.rosary;
-    if(R.phase==='first3'){
-      if(R.index>0){ R.index--; render(); return; }
-      state.rosary = null;
-      state.step = rosaryLinkIndex();
-      render(); return;
+    const url = PATH(slug);
+    readerBody.innerHTML = 'Ładowanie…';
+    let loaded = false;
+    if (url) {
+      try {
+        const res = await fetch(url, { cache: 'no-store' });
+        if (res.ok) {
+          let text = await res.text();
+          if (url.endsWith('.md')) {
+            text = text
+              .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+              .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+              .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+              .replace(/\*\*(.*?)\*\*/gim, '<strong>$1</strong>')
+              .replace(/\*(.*?)\*/gim, '<em>$1</em>')
+              .replace(/\n$/g, '')
+              .replace(/\n\s*\n/g, '</p><p>')
+              .replace(/^(?!<h\d|<p|<ul|<ol|<blockquote|<pre|<code)/gim, '<p>')
+              .replace(/<\/p><p><\/p>/g, '</p>');
+            readerBody.innerHTML = text.startsWith('<') ? text : `<p>${text}</p>`;
+          } else {
+            readerBody.innerHTML = text;
+          }
+          loaded = true;
+        }
+      } catch(e) {}
     }
-    if(R.phase==='dailyPrayer'){ R.phase='first3'; R.index=2; render(); return; }
-    if(R.phase==='last2'){
-      if(R.index>0){ R.index--; render(); return; }
-      R.phase='dailyPrayer'; render(); return;
+
+    if (!loaded) {
+      readerBody.innerHTML = INLINE_CONTENT[slug] || '<p>(Brak treści — dodaj plik .md lub uzupełnij INLINE_CONTENT.)</p>';
     }
-    if(R.phase==='litania'){ R.phase='last2'; R.index=1; render(); return; }
-    if(R.phase==='bernard'){ R.phase='litania'; render(); return; }
-    if(R.phase==='closing'){ R.phase='bernard'; render(); return; }
-    return;
-  }
-  if(!state.name && !state.preview) return;
 
-  const linkIdx = rosaryLinkIndex();
-  if (linkIdx !== -1 && state.step === linkIdx + 1 && state.lastRosaryType) {
-    state.rosary = { type: state.lastRosaryType, phase:'closing', index:0 };
-    render();
-    return;
+    reader.style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  if(state.step > 0){ state.step -= 1; state.fromRosaryExit = false; save(); render(); }
-}
-
-// ——— ZDARZENIA ———
-ui.themeBtn.addEventListener('click', toggleTheme);
-ui.startBtn.addEventListener('click', ()=>{
-  if(isResetEligible()){
-    const prevName = state.name; if(prevName) clearFor(prevName);
-    state.preview = false; if(ui.peekBtn) ui.peekBtn.classList.remove('active');
-    state = { name:'', day:1, step:0, done:Array(9).fill(false), start_date:null, preview:false, rosary:null, lastRosaryType:null, fromRosaryExit:false, intro:false };
-    snapshot = null; ui.nameInput.value = '';
-    render();
-    return;
+  function showTiles(section) {
+    setActive(
+      section==='wiara'?btnWiara:
+      section==='arty'?btnArty:
+      section==='modlitwy'?btnModlitwy:
+      section==='ksiazki'?btnKsiazki:null
+    );
+    clearAll();
+    if(section==='wiara') tilesWiara.style.display='grid';
+    else if(section==='arty') tilesArty.style.display='grid';
+    else if(section==='modlitwy') tilesModlitwy.style.display='grid';
+    else if(section==='ksiazki') tilesKsiazki.style.display='grid';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
-  const inputName = ui.nameInput.value.trim();
-  if(!inputName){ return; }
-  state.preview = false; snapshot = null; ui.peekBtn.classList.remove('active');
-  state.intro = false; // zawsze start z kroku 1
-  load(inputName); if(!state.start_date) state.start_date = todayISO(); save(); render(); showToast(`Witaj, ${state.name}!`);
-  ui.nameInput.value = state.name; updateStartButton();
-  scheduleMidnightSync(); syncDayToCalendar();
-});
 
-ui.prevBottom.addEventListener('click', prevStep);
-ui.nextBottom.addEventListener('click', nextStep);
-ui.nameInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter' && canStart()) ui.startBtn.click(); });
-ui.nameInput.addEventListener('input', updateStartButton);
-
-ui.peekBtn.addEventListener('click', ()=>{
-  if(state.preview){
-    if(snapshot){ state = JSON.parse(snapshot); snapshot = null; }
-    state.preview = false; state.intro = false;
-    ui.peekBtn.classList.remove('active');
-    render();
-  } else {
-    snapshot = JSON.stringify(state);
-    state.preview = true; state.intro = false;
-    ui.peekBtn.classList.add('active');
-    if(!state.day) state.day = 1; if(!state.step) state.step = 0;
-    render();
+  function handleHash(){
+    const h = (location.hash||'').replace(/^#/, '').trim();
+    if(!h){ setActive(null); clearAll(); intro.style.display='block'; return; }
+    const [section, name] = h.split('/');
+    if(section && !name){ showTiles(section); return; }
+    if(section && name){ showArticle(section, name); return; }
+    setActive(null); clearAll(); intro.style.display='block';
   }
-});
 
-function listProfiles(){
-  const rows = [];
-  for(let i=0;i<localStorage.length;i++){
-    const k = localStorage.key(i);
-    if(!k || !k.startsWith(LS_PREFIX)) continue;
-    try{
-      const d = JSON.parse(localStorage.getItem(k) || '{}');
-      const name = d.display_name || k.slice(LS_PREFIX.length);
-      if(!name || /^\s*$/.test(name)) continue;
-      const start = d.start_date ? formatPL(parseISODate(d.start_date)) : '—';
-      const doneCount = Array.isArray(d.done) ? d.done.filter(Boolean).length : 0;
-      rows.push({name, start, doneCount});
-    }catch(_){ /* ignore */ }
-  }
-  rows.sort((a,b)=> a.name.localeCompare(b.name, 'pl'));
-  return rows;
-}
-function openNameMenu(){
-  const rows = listProfiles();
-  const menu = ui.nameMenu; if(!menu) return;
-  if(rows.length===0){
-    menu.innerHTML = '<div class="empty">Brak zapisanych imion. Zacznij od wpisania imienia i kliknij „Start”.</div>';
-  } else {
-    const items = rows.map(r => `
-      <div class="item" data-name="${r.name}">
-        <div>
-          <div><strong>${r.name}</strong></div>
-          <div class="meta">start: ${r.start} • ukończone dni: ${r.doneCount}/9</div>
-        </div>
-        <button class="del" data-del="${r.name}">Usuń</button>
-      </div>`).join('');
-    menu.innerHTML = '<h4>Zapisane imiona</h4>' + items;
-  }
-  menu.classList.add('show');
-  menu.setAttribute('aria-hidden','false');
-}
-function closeNameMenu(){ if(!ui.nameMenu) return; ui.nameMenu.classList.remove('show'); ui.nameMenu.setAttribute('aria-hidden','true'); }
+  window.addEventListener('hashchange', handleHash);
+  document.addEventListener('DOMContentLoaded', handleHash);
 
-ui.nameBtn.addEventListener('click', (e)=>{
-  e.stopPropagation();
-  if(ui.nameMenu.classList.contains('show')) closeNameMenu(); else openNameMenu();
-});
+  backBtn.addEventListener('click', () => {
+    const h = (location.hash||'').replace(/^#/, '').trim();
+    const section = h.split('/')[0] || 'wiara';
+    location.hash = '#' + section;
+  });
 
-document.addEventListener('click', (e)=>{
-  if(!ui.nameMenu.classList.contains('show')) return;
-  if(!ui.nameMenu.contains(e.target) && e.target !== ui.nameBtn) closeNameMenu();
-});
+  document.getElementById('homeLink').addEventListener('click', () => {
+    setActive(null);
+    clearAll();
+    intro.style.display = 'block';
+    location.hash = '';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
 
-ui.nameMenu.addEventListener('click', (e)=>{
-  const del = e.target.closest('[data-del]');
-  if(del){
-    const n = del.getAttribute('data-del');
-    if(n){
-      clearFor(n);
-      if(state.name && state.name.toLowerCase()===n.toLowerCase()){
-        state = { name:'', day:1, step:0, done:Array(9).fill(false), start_date:null, preview:false, rosary:null, lastRosaryType:null, fromRosaryExit:false, intro:false };
-        render();
-      }
-      openNameMenu();
-    }
-    return;
-  }
-  const item = e.target.closest('.item');
-  if(item){
-    const n = item.getAttribute('data-name');
-    if(n){
-      state.preview=false; if(ui.peekBtn) ui.peekBtn.classList.remove('active');
-      state.intro=false;
-      load(n); if(!state.start_date) state.start_date = todayISO(); save(); render(); showToast(`Witaj, ${state.name}!`); closeNameMenu();
-      ui.nameInput.value = state.name; updateStartButton();
-      scheduleMidnightSync(); syncDayToCalendar();
-    }
-  }
-});
+  // 🔊 Automatyczne pauzowanie innych odtwarzaczy radia
+  const radios = document.querySelectorAll('.tiles-links audio');
 
-// Override numeracji w trakcie różańca — ciągła numeracja Krok X z Y
-try{
-  const __renderOriginal = render;
-  render = function(){
-    __renderOriginal();
-    if(state && state.rosary){
-      const baseIdx = rosaryLinkIndex();
-      const R = state.rosary; let ord = 1;
-      if(R.phase==='first3'){ ord = R.index + 1; }
-      else if(R.phase==='dailyPrayer'){ ord = 4; }
-      else if(R.phase==='last2'){ ord = 5 + R.index; }
-      else if(R.phase==='litania'){ ord = 7; }
-      else if(R.phase==='bernard'){ ord = 8; }
-      else if(R.phase==='closing'){ ord = 9; }
-      const total = totalForDay();
-      if(ui && ui.metaStep){ ui.metaStep.textContent = `Krok ${baseIdx + ord + 1} z ${total}`; }
-    }
-  };
-}catch(e){ /* ignore */ }
-
-// ——— PROSTE TESTY ———
-(function selfTests(){
-  const backupState = JSON.stringify(state);
-  const backupNameInput = ui.nameInput.value;
-  const backupPeekActive = ui.peekBtn.classList.contains('active');
-  TESTING = true;
-  try{
-    console.assert(typeof totalForDay()==='number', 'totalForDay number');
-
-    // Sprawdź, że w PODGLĄDZIE też blokujemy "Dalej" na ekranie linków
-    state.name = 'Test'; state.preview = true; state.day = 1; state.step = rosaryLinkIndex() >=0 ? rosaryLinkIndex() : 1; state.rosary=null; state.intro=false;
-    render();
-    console.assert(isRosarySelectionStep() === true, 'Preview: isRosarySelectionStep should be true');
-    console.assert(ui.nextBottom.disabled === true, 'Preview: Next must be disabled on rosary selection');
-
-    // Test etykiety „Opis”
-    state.preview = false; state.step = 0; state.intro=false; render();
-    console.assert(ui.prevBottom.textContent.includes('Opis'), 'Prev label should be Opis on step 0');
-
-    console.log('%cAll self-tests passed','color:green');
-  }catch(err){ console.warn('Self-tests failed:', err); }
-  try{ state = JSON.parse(backupState); }catch(_){
-    state = { name:'', day:1, step:0, done:Array(9).fill(false), start_date:null, preview:false, rosary:null, lastRosaryType:null, fromRosaryExit:false, intro:false };
-  }
-  ui.nameInput.value = backupNameInput || '';
-  if(backupPeekActive) ui.peekBtn.classList.add('active'); else ui.peekBtn.classList.remove('active');
-  TESTING = false;
-  state.name = '';
-  state.preview = false;
-  state.rosary = null;
-  state.lastRosaryType = null;
-  state.intro = false;
-  render();
-})();
-
-(function init(){
-  initTheme();
-  render();
-  scheduleMidnightSync();
-  document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible') syncDayToCalendar(); });
-})();
+  radios.forEach(player => {
+    player.addEventListener('play', () => {
+      radios.forEach(other => {
+        if (other !== player) {
+          other.pause();
+        }
+      });
+    });
+  });
 </script>
-</body>
-</html>
